@@ -17,3 +17,23 @@ usage: qiime_analysis.py [-h] -i INPUT -o OUTPUT [-s] [-f] [-t TRIM_THRESHOLD]
 qiime_analysis.py: error: argument -i is required
 ```
 
+
+```
+optional arguments:
+  -h, --help            show this help message and exit
+  -i INPUT              The folder where Fastq files are stored [required]
+  -o OUTPUT             The folder of all results [required]
+  -s                    Using SILVA database [False]
+  -f                    Using Unite database for fungal samples[False]
+  -t TRIM_THRESHOLD     phred quality threshold for trimming [12]
+  -q QC_THRESHOLD       quality control phred threshold [19]
+  -j                    use fastq-join for joining [False]
+  -c CONFIGFILE         Configuration file name [qiime.cfg]
+  -p PARAMETER_FILE_NAME
+                        The name of the parameter file [if not assigned is
+                        automatically produced using configuration file
+  -n NUMBER_OF_CORES    Number of cores to be used for the analysis [2]
+  -d FASTQ_P            Percentage of maximum difference in fastq-join [8]
+  -m                    Assign maxloose to be true for bbmerge [False]
+  -e DEPTH              set the depth of diversity analyses [10000]
+```
