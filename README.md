@@ -1,5 +1,6 @@
 # QANAUS
-Qiime 1 ANalysis AUtomating Script
+Qiime 1 ANalysis AUtomating Script.
+
 This script is written to reduce the effort and time for Qiime 1 analysis.
 
 ## Installation:
@@ -37,3 +38,23 @@ optional arguments:
   -m                    Assign maxloose to be true for bbmerge [False]
   -e DEPTH              set the depth of diversity analyses [10000]
 ```
+
+## Example:
+```buildoutcfg
+$ qiime_analysis.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -s -t 12 -p 10 -e 5000
+```
+
+## Results:
+Output folder will has 5 folders:
+
+| Folder name | content |
+|--| -- |
+| others | others|
+
+|trimmed\| trimmed|
+
+|merged\ |merged|
+|qc\ |quality_step| 
+|chi\| chimera_removed| 
+|otus\| otus|
+|div\ | diversity_analyses |
