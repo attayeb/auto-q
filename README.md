@@ -47,11 +47,12 @@ $ qiime_analysis.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -
 ## Results:
 Output folder will has 5 folders:
 
-| Folder name | content            |
-| others      | log file, Mapping file, parameter file    |
+| Folder name | content                                   |
+|-------------|-------------------------------------------|
+| others\     | log file, Mapping file, parameter file    |
 | trimmed\    | fastq files after trimming                |
 | merged\     | fastq files after merging pair reads      |
 | qc\         | fasta files after quality step            | 
 | chi\        | fastq files after chimera removed         | 
 | otus\       | picked otus =standard Qiime output=       |
-| div\        | diversity analyses results |
+| div\        | diversity analyses results                |
