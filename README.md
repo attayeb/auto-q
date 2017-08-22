@@ -45,7 +45,7 @@ $ qiime_analysis.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -
 ```
 
 ## Results:
-Output folder will has 7 folders:
+Output folder will has 7 subfolders:
 
 | Folder name | content                                   |
 |-------------|-------------------------------------------|
