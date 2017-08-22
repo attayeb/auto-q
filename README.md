@@ -50,11 +50,10 @@ Output folder will has 5 folders:
 | Folder name | content |
 |--| -- |
 | others | others|
-
 |trimmed\| trimmed|
-
 |merged\ |merged|
 |qc\ |quality_step| 
 |chi\| chimera_removed| 
 |otus\| otus|
 |div\ | diversity_analyses |
+|--|--|
