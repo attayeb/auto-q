@@ -40,7 +40,7 @@ optional arguments:
 ```
 
 ## Example:
-```buildoutcfg
+```
 $ qiime_analysis.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -s -t 12 -p 10 -e 5000
 ```
 
