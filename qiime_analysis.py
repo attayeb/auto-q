@@ -4,9 +4,15 @@ from __future__ import unicode_literals
 # import sys
 
 ## more to do:
+
+
 # 1. log file
 # 2. save parameter file and configuration file in results folder
 # 3. merge fasta files before closed reference otu picking or use filtering
+# 4. remove primers from 3' end and 5'end (length will be decided by Park san)
+# 5. remove short reads < 240
+
+
 
 ## updates:
 # 0.2.4 Using fastq-join with trimming 10 and p 16 with silva as default
@@ -719,8 +725,9 @@ if __name__ == "__main__":
 
     if (arg.beginwith == "diversity_analysis") and (arg.mapping_file == None):
         pass
+    if not os.path.isdir(PR['others']):
+        os.mkdir(PR['others'])
 
-    os.mkdir(PR['others'])
     logging.basicConfig(filename=PR['others']+"log.txt",
                         format='%(asctime)s %(levelname)s \n %(message)s',
                         level = logging.DEBUG)

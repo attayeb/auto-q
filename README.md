@@ -11,11 +11,12 @@ After that you need to modify the configuration file (qiime.cfg) to update the f
 ## Steps of analysis:
 You need to prepare Fastq files in one folder, not compressed:
 ```
-usage: qiime_analysis.py [-h] -i INPUT -o OUTPUT [-s] [-f] [-t TRIM_THRESHOLD]
-                         [-q QC_THRESHOLD] [-j] [-c CONFIGFILE]
-                         [-p PARAMETER_FILE_NAME] [-n NUMBER_OF_CORES]
-                         [-d FASTQ_P] [-m] [-e DEPTH]
-qiime_analysis.py: error: argument -i is required
+usage: qiime_analysis.py [-h] -i INPUT -o OUTPUT [-b BEGINWITH]
+                         [-t TRIM_THRESHOLD] [-s STOP_AT] [-j JOINING_METHOD]
+                         [-d FASTQ_P] [-q QC_THRESHOLD] [-c CONFIGFILE]
+                         [-a MAPPING_FILE] [-p PARAMETER_FILE_NAME]
+                         [-n NUMBER_OF_CORES] [-f] [-m] [-r RDB] [-e DEPTH]
+
 ```
 
 
@@ -24,24 +25,28 @@ optional arguments:
   -h, --help            show this help message and exit
   -i INPUT              The folder where Fastq files are stored [required]
   -o OUTPUT             The folder of all results [required]
-  -s                    Using SILVA database [False]
-  -f                    Using Unite database for fungal samples[False]
-  -t TRIM_THRESHOLD     phred quality threshold for trimming [12]
+  -b BEGINWITH          begin with: [otu_picking], [diversity_analysis]
+  -t TRIM_THRESHOLD     phred quality threshold for trimming [10]
+  -s STOP_AT            stop at [chimera_removal\]
+  -j JOINING_METHOD     choose the merging method (fastq-join) or (bbmerge)
+  -d FASTQ_P            Percentage of maximum difference in fastq-join [16]
   -q QC_THRESHOLD       quality control phred threshold [19]
-  -j                    use fastq-join for joining [False]
   -c CONFIGFILE         Configuration file name [qiime.cfg]
+  -a MAPPING_FILE       Mapping file name
   -p PARAMETER_FILE_NAME
                         The name of the parameter file [if not assigned is
                         automatically produced using configuration file
   -n NUMBER_OF_CORES    Number of cores to be used for the analysis [2]
-  -d FASTQ_P            Percentage of maximum difference in fastq-join [8]
+  -f                    Using Unite database for fungal samples[False]
   -m                    Assign maxloose to be true for bbmerge [False]
+  -r RDB                Reference data base [silva, greengenes]
   -e DEPTH              set the depth of diversity analyses [10000]
+
 ```
 
 ## Example:
 ```
-$ qiime_analysis.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -s -t 12 -p 10 -e 5000
+$ qiime_analysis.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -r silva -t 12 -p 10 -e 5000
 ```
 
 ## Results:
