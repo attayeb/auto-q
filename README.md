@@ -1,10 +1,10 @@
-# QANAUS
-Qiime 1 ANalysis AUtomating Script.
+# Auto-q
+Qiime Analysis Automating Script.
 
-This script is written to reduce the effort and time for Qiime 1 analysis.
+This script is written to reduce the effort and time for Qiime analysis.
 
 ## Installation:
-This script is designed to be installed in Qiime 1 virtual machine. first copy the file to specific folder and then add it to your path.
+This script is designed to be installed in Qiime virtual machine. first copy the file to specific folder and then add it to your path.
 
 After that you need to modify the configuration file (qiime.cfg) to update the folders of databases according to your settings.
 
