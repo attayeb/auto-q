@@ -11,11 +11,12 @@ After that you need to modify the configuration file (qiime.cfg) to update the f
 ## Steps of analysis:
 You need to prepare Fastq files in one folder, not compressed:
 ```
-usage: qiime_analysis.py [-h] -i INPUT -o OUTPUT [-b BEGINWITH]
-                         [-t TRIM_THRESHOLD] [-s STOP_AT] [-j JOINING_METHOD]
-                         [-d FASTQ_P] [-q QC_THRESHOLD] [-c CONFIGFILE]
-                         [-a MAPPING_FILE] [-p PARAMETER_FILE_NAME]
-                         [-n NUMBER_OF_CORES] [-f] [-m] [-r RDB] [-e DEPTH]
+usage: auto-q.py [-h] -i INPUT -o OUTPUT [-b BEGINWITH] [-t TRIM_THRESHOLD]
+                 [-s STOP_AT] [-j JOINING_METHOD] [-d FASTQ_P]
+                 [-q QC_THRESHOLD] [-c CONFIGFILE]
+                 [--adapter ADAPTER_REFERENCE] [-a MAPPING_FILE]
+                 [-p PARAMETER_FILE_NAME] [-n NUMBER_OF_CORES] [-f] [-m]
+                 [-r RDB] [-e DEPTH] [--ml MINIMUM_LENGTH]
 
 ```
 
@@ -32,6 +33,8 @@ optional arguments:
   -d FASTQ_P            Percentage of maximum difference in fastq-join [16]
   -q QC_THRESHOLD       quality control phred threshold [19]
   -c CONFIGFILE         Configuration file name [qiime.cfg]
+  --adapter ADAPTER_REFERENCE
+                        Adapters reference file
   -a MAPPING_FILE       Mapping file name
   -p PARAMETER_FILE_NAME
                         The name of the parameter file [if not assigned is
@@ -41,6 +44,7 @@ optional arguments:
   -m                    Assign maxloose to be true for bbmerge [False]
   -r RDB                Reference data base [silva, greengenes]
   -e DEPTH              set the depth of diversity analyses [10000]
+  --ml MINIMUM_LENGTH   Minimum length of reads kept after merging [380]
 
 ```
 
