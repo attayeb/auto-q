@@ -50,7 +50,7 @@ optional arguments:
 
 ## Example:
 ```
-$ qiime_analysis.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -r silva -t 12 -p 10 -e 5000
+$ auto-q.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -t 12 -d 10 -r silva -n 10 -e 5000 -c /bin/auto-q/qiime.cfg 
 ```
 
 ## Results:
@@ -65,3 +65,4 @@ Output folder will has 7 subfolders:
 | chi\        | fastq files after chimera removed         | 
 | otus\       | picked otus *standard Qiime output*       |
 | div\        | diversity analyses results                |
+
