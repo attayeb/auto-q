@@ -18,7 +18,7 @@ To run Auto-q, few softwares need to be installed in the Qiime virtual machine a
 
 3. Install Auto-q by running in home folder:
 ```buildoutcfg
-git https://github.com/Attayeb/auto-q.git 
+git https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git 
 cd auto-q
 ```
 
