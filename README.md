@@ -2,11 +2,41 @@
 Qiime Analysis Automating Script.
 
 This script is written to reduce the effort and time for Qiime analysis.
+It is designed to work on illumina
 
 ## Installation:
+
 This script is designed to be installed in Qiime virtual machine. first copy the file to specific folder and then add it to your path.
 
 After that you need to modify the configuration file (qiime.cfg) to update the folders of databases according to your settings.
+
+If you use windows and did not install Qiime virtual machine, please follow the instructions from Qiime web page: <http://qiime.org/install/virtual_box.html>
+
+To run Auto-q, few softwares need to be installed in the Qiime virtual machine and need to be added to the execution path
+1. Install bbduk tools from <https://sourceforge.net/projects/bbmap/> and add the folder to path
+2. Install usearch from <https://www.drive5.com/usearch/download.html> for a license issues you need to provide your email to install the free 32 bit version. please install version 6.1.544 
+
+3. Install Auto-q by running in home folder:
+```buildoutcfg
+git https://github.com/Attayeb/auto-q.git 
+cd auto-q
+```
+
+
+## Sequence files preparation:
+### Fastq files: 
+FASTQ files are named with the sample name and the sample number, which is a numeric assignment based on the order that the sample is listed in the sample sheet. Example:
+                     
+R1 &rarr;  SampleName_S1_L001_R1_001.fastq.gz 
+
+R2 &rarr;  SampleName_S1_L001_R2_001.fastq.gz
+
+keep a copy of the original compressed fastq files in a safe folder and use another copy after decompressing them. To decompress the fastq.gz file use this commnad inside the folder in terminal:
+```
+$ gunzip *fastq.gz
+
+``` 
+
 
 ## Steps of analysis:
 You need to prepare Fastq files in one folder, not compressed:
@@ -66,3 +96,5 @@ Output folder will has 7 subfolders:
 | otus\       | picked otus *standard Qiime output*       |
 | div\        | diversity analyses results                |
 
+## How to cite:
+The paper of the script is under preparation now

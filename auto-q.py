@@ -31,7 +31,6 @@ import datetime
 import os               # operation system packages
 import configparser     # a package to parse INI file or confige file.
 import argparse         # a package to parse commandline arguments.
-import pandas as pd     # pandas package
 import sys
 from re import sub
 
@@ -587,6 +586,17 @@ def pickotus(in_folder, out_folder, rdb="silva", fungus=False):
                    out_folder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
                    PR['gg_reference_seqs']), shell=True)
 
+
+def writedf(out_file, ids, sampleids):
+    f = open(out_file, "w+")
+    f.write("#SampleID\tBarcodeSequence\tLinkerPrimerSequence\tRead\tFile\tDescription\n")
+    for x in range(len(ids)):
+        f.write("%s\t\t\tR1\t%s\tsingle_file\n"%(ids[x],sampleids[x] ))
+    f.close()
+
+
+
+
 def create_map(in_folder, out_file):
     """
     create_map(in_folder, out_file)
@@ -608,13 +618,7 @@ def create_map(in_folder, out_file):
     ids = [x.replace(".fasta", "") for x in sampleids]
     ids = [x.split("_")[0] for x in ids]
     d = {'#SampleID': ids}
-    df = pd.DataFrame(data=d)
-    df['BarcodeSequence'] = ""
-    df['LinkerPrimerSequence'] = ""
-    df['Read'] = "R1"
-    df["File"] = sampleids
-    df["Description"] = "single_file"
-    df.to_csv(out_file, sep=str(u"\t"), index=False)
+    writedf(out_file, ids, sampleids)
 
 
 def corediv(in_folder, out_folder, mapping_file, depth):
