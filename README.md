@@ -5,28 +5,19 @@ This script is written to reduce the effort and time for Qiime analysis.
 It is designed to work on illumina pair-end reads FASTQ files.
 
 ## Installation:
+1. This script is designed to be installed in Qiime virtual machine. To install QIIME, please check this link: <http://qiime.org/install/install.html>
 
-1. Install usearch from <https://www.drive5.com/usearch/download.html> for a license issues you need to provide your email to install the free 32 bit version. QIIME works with version 6.1.544 please download it. 
+2. Install usearch: follow the instructions in this link  <https://www.drive5.com/usearch/download.html> . QIIME works with version 6.1.544 32 bit. Please download it. 
 
-Create bin/ folder in qiime home folder in the virtual machine /home/qiime/bin
-```buildoutcfg
-$ cd ~
-$ mkdir ~/bin/
-$ cd bin
-$ mkdir usearch
-```
-copy usearch6.1.544_i86linux32 to /home/qiime/bin/usearch/ and rename the file name to usearch61
-
-```buildoutcfg
-$ mv usearch6.1.544_i86linux32 usearch61
-```
-To make usearch61 executable run the following command in usearch folder
+* Create bin/ folder in qiime home folder in the virtual machine /home/qiime/bin
+* Copy usearch6.1.544_i86linux32 to /home/qiime/bin/usearch/ and rename the file to usearch61
+* Make usearch61 executable using this command
 ```
 $ chmod +x usearch61
 ``` 
 [comment]: <> (this is comment)
 
-2. Install bbduk tools from <https://sourceforge.net/projects/bbmap/> or you can run these commands in /home/qiime/bin/ folder: 
+3. Install bbduk tools from <https://sourceforge.net/projects/bbmap/> or you can run these commands in /home/qiime/bin/ folder: 
 
 ```buildoutcfg
 $ wget https://sourceforge.net/projects/bbmap/files/BBMap_37.66.tar.gz
@@ -34,23 +25,24 @@ $ tar -zxvf BBMap_37.66.tar.gz && rm BBMap_37.66.tar.gz
 
 ```
 
-This script is designed to be installed in Qiime virtual machine. first copy the file to specific folder and then add it to your path.
-
-After that you need to modify the configuration file (qiime.cfg) to update the folders of databases according to your settings.
-
-If you use windows and did not install Qiime virtual machine, please follow the instructions from Qiime web page: <http://qiime.org/install/virtual_box.html>
-
-To run Auto-q, few softwares need to be installed in the Qiime virtual machine and need to be added to the execution path
-
-3. Install Auto-q by running in home folder:
+4. Install Auto-q by executing these commands in /home/qiime/bin/ :
 ```buildoutcfg
 $ git https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git 
-$ cd auto-q
 ```
 Edit .bashrc in your home directory and add the following line at the end:
 ```buildoutcfg
-export PATH="/home/qiime/auto-q/:/home/qiime/bbtools/bin/:/home/qiime/usearch/:$PATH"
+export PATH="/home/qiime/bin/auto-q/:/home/qiime/bin/bbtools/:/home/qiime/bin/usearch/:$PATH"
+```
+You need superuser permission to modify .bashrc file.
+```buildoutcfg
+sudo gedit ~/.bashrc
 ``` 
+The password for qiime user is qiime, 
+This file is important for your machine, so be careful not to affect other lines.
+
+5. If you want to use SILVA database you can download it from here <https://www.arb-silva.de/no_cache/download/archive/qiime/> use the latest one Silva_128_release.tgz, after downloading this file decompress it.
+6. Modify qiime.cfg file to indicate the folders of your database. The default preinstalled greengenes folder is: /home/qiime/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/
+ Please modify this file according to your settings.
 
 ## Sequence files preparation:
 ### Fastq files: 
@@ -64,7 +56,7 @@ keep a copy of the original compressed fastq files in a safe folder and use anot
 ```
 $ gunzip *.fastq.gz
 ``` 
-Auto-q determines R1 and R2 using the name of the file, please do not modify them
+Auto-q determines R1 and R2 using the names of the files, please do not modify the file names.
 
 ## Steps of analysis:
 
