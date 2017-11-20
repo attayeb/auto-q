@@ -2,9 +2,37 @@
 Qiime Analysis Automating Script.
 
 This script is written to reduce the effort and time for Qiime analysis.
-It is designed to work on illumina
+It is designed to work on illumina pair-end reads FASTQ files.
 
 ## Installation:
+
+1. Install usearch from <https://www.drive5.com/usearch/download.html> for a license issues you need to provide your email to install the free 32 bit version. QIIME works with version 6.1.544 please download it. 
+
+Create bin/ folder in qiime home folder in the virtual machine /home/qiime/bin
+```buildoutcfg
+$ cd ~
+$ mkdir ~/bin/
+$ cd bin
+$ mkdir usearch
+```
+copy usearch6.1.544_i86linux32 to /home/qiime/bin/usearch/ and rename the file name to usearch61
+
+```buildoutcfg
+$ mv usearch6.1.544_i86linux32 usearch61
+```
+To make usearch61 executable run the following command in usearch folder
+```
+$ chmod +x usearch61
+``` 
+[comment]: <> (this is comment)
+
+2. Install bbduk tools from <https://sourceforge.net/projects/bbmap/> or you can run these commands in /home/qiime/bin/ folder: 
+
+```buildoutcfg
+$ wget https://sourceforge.net/projects/bbmap/files/BBMap_37.66.tar.gz
+$ tar -zxvf BBMap_37.66.tar.gz && rm BBMap_37.66.tar.gz
+
+```
 
 This script is designed to be installed in Qiime virtual machine. first copy the file to specific folder and then add it to your path.
 
@@ -13,15 +41,16 @@ After that you need to modify the configuration file (qiime.cfg) to update the f
 If you use windows and did not install Qiime virtual machine, please follow the instructions from Qiime web page: <http://qiime.org/install/virtual_box.html>
 
 To run Auto-q, few softwares need to be installed in the Qiime virtual machine and need to be added to the execution path
-1. Install bbduk tools from <https://sourceforge.net/projects/bbmap/> and add the folder to path
-2. Install usearch from <https://www.drive5.com/usearch/download.html> for a license issues you need to provide your email to install the free 32 bit version. please install version 6.1.544 
 
 3. Install Auto-q by running in home folder:
 ```buildoutcfg
-git https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git 
-cd auto-q
+$ git https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git 
+$ cd auto-q
 ```
-
+Edit .bashrc in your home directory and add the following line at the end:
+```buildoutcfg
+export PATH="/home/qiime/auto-q/:/home/qiime/bbtools/bin/:/home/qiime/usearch/:$PATH"
+``` 
 
 ## Sequence files preparation:
 ### Fastq files: 
@@ -33,13 +62,13 @@ R2 &rarr;  SampleName_S1_L001_R2_001.fastq.gz
 
 keep a copy of the original compressed fastq files in a safe folder and use another copy after decompressing them. To decompress the fastq.gz file use this commnad inside the folder in terminal:
 ```
-$ gunzip *fastq.gz
-
+$ gunzip *.fastq.gz
 ``` 
-
+Auto-q determines R1 and R2 using the name of the file, please do not modify them
 
 ## Steps of analysis:
-You need to prepare Fastq files in one folder, not compressed:
+
+
 ```
 usage: auto-q.py [-h] -i INPUT -o OUTPUT [-b BEGINWITH] [-t TRIM_THRESHOLD]
                  [-s STOP_AT] [-j JOINING_METHOD] [-d FASTQ_P]
