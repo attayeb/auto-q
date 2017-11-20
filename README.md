@@ -15,9 +15,8 @@ It is designed to work on illumina pair-end reads FASTQ files.
 ```
 $ chmod +x usearch61
 ``` 
-[comment]: <> (this is comment)
 
-3. Install bbduk tools from <https://sourceforge.net/projects/bbmap/> or you can run these commands in /home/qiime/bin/ folder: 
+3. Install BBtools from <https://sourceforge.net/projects/bbmap/> or you can run these commands in /home/qiime/bin/ folder: 
 
 ```buildoutcfg
 $ wget https://sourceforge.net/projects/bbmap/files/BBMap_37.66.tar.gz
@@ -31,11 +30,11 @@ $ git https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git
 ```
 Edit .bashrc in your home directory and add the following line at the end:
 ```buildoutcfg
-export PATH="/home/qiime/bin/auto-q/:/home/qiime/bin/bbtools/:/home/qiime/bin/usearch/:$PATH"
+$ export PATH="/home/qiime/bin/auto-q/:/home/qiime/bin/bbtools/:/home/qiime/bin/usearch/:$PATH"
 ```
 You need superuser permission to modify .bashrc file.
 ```buildoutcfg
-sudo gedit ~/.bashrc
+$ sudo gedit ~/.bashrc
 ``` 
 The password for qiime user is qiime, 
 This file is important for your machine, so be careful not to affect other lines.
