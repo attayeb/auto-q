@@ -260,15 +260,6 @@ def primertrim(infqfile, outfqfile, length):
 
 def trimfolder(inFolder, outFolder, trimq, ftrim=True):
     """
-    Trim the right side of fastq files using BBDUK,
-    in_folder: input is a folder of fastq files with pair ends
-    both pairs will be trimmed together
-    out_folder is the folder were trimmed files is to be saved
-    trimq is the threshold of trimming: 12 is recommended
-    trimfolder(in_folder, out_folder, trimq)
-    ex:
-    trimfolder("/experiment1/data/fastq/",
-           "/experiment1/analysis/trimmed/", trimq=12)
 
     """
 
@@ -323,20 +314,6 @@ def trimfolder(inFolder, outFolder, trimq, ftrim=True):
 
 def mergefolderbb(inFolder, outFolder, maxloose=True):
     """
-    Merge a folder of pair ends fastq files using BBMERGE
-    in_folder : input
-    out_folder : output
-    maxloose is set as default, if you want to use
-    default parameters assign maxloose=False
-
-    mergefolderbb(in_folder, out_folder, maxloose=True)
-
-    ex:
-    maxloose:
-    mergefolderbb("/data/fastq/", "data/merged/", maxloose=True)
-    default:
-    mergefolderbb("/data/fastq/", "data/merged/", maxloose=False)
-
 
     """
     inFolder = asfolder(inFolder)
@@ -374,15 +351,7 @@ def mergefolderbb(inFolder, outFolder, maxloose=True):
 
 def mergefolderfastq(inFolder, outFolder, pp):
     """
-    Merge folder of fastq files following illumina naming system
-    using fastq-join
-    mergefolderfastq(in_folder, out_folder, pp)
-    in_folder: the source folder of fastq files.
-    out_folder: the target folder for merged files.
-    p: percentage of maximum difference.
-    ex:
-        mergefolderfastq("/home/data/human/",
-        "/home/data/merged-human/", p=12)
+
     """
     global PR
     inFolder = asfolder(inFolder)
@@ -417,13 +386,7 @@ def mergefolderfastq(inFolder, outFolder, pp):
 
 def qualitycontrol(inFolder, outFolder, q):
     """
-    Using split_libraries script from QIIME
-    Out_put is fasta files
-    all other files will be suppressed
-    q: is the quality threshold
 
-    qualitycontrol(in_folder, out_folder, q)
-    qualitycontrol("data1/merged/", "/data1/qc/", q=19)
 
     """
     inFolder = asfolder(inFolder)
@@ -456,17 +419,7 @@ def qualitycontrol(inFolder, outFolder, q):
 
 def removechimera(inFolder, outFolder, rdb="silva"):
     """
-    removechimera(in_folder,out_folder, silva=False)
-    GreenGenes database are used as default
-    if you want to use silve assign silva=True
 
-    ex:
-    using Silva:
-       removechimera("/data/qc/", "/data/chi/", silva=True)
-    using GG:
-       removechimera("/data/qc/", "/data/chi/", silva=False)
-       or:
-       removechimera("/data/qc/", "/data/chi/")
 
     """
     global PR
@@ -503,11 +456,7 @@ def removechimera(inFolder, outFolder, rdb="silva"):
 
 def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
     """
-    pickotus(in_folder, out_folder, silva=False)
-    input (in_folder): is a folder of fasta files
-    if you want to use silve assign it as True
-    ex:
-    pickotus(in_folder, out_folder, silva=True)
+
 
     """
 
@@ -583,16 +532,7 @@ def writedf(outFile, ids, sampleIds):
 
 def create_map(inFolder, outFile):
     """
-    create_map(in_folder, out_file)
-    in_folder: is the folder: results from otu picking
-    out_file is the file name !! Not folder
-    Create basic mapping file,
-    If you have other parameters, please use excell or
-    libreoffice to add them, like for example Age, or Treated
 
-    ex:
-    create_map("/human/experiment22/analyzed/otus/",
-    "/human/experiments/analyzed/samples_map.txt")
 
     """
     inFolder = asfolder(inFolder)
@@ -607,13 +547,7 @@ def create_map(inFolder, outFile):
 
 def corediv(inFolder, outFolder, mappingFile, depth):
     """
-    corediv(in_folder, out_folder, mapping_file, depth)
-    in_folder: the otus folder
-    depth of subsampling
 
-    ex:
-    corediv("/human/aging/otus/", "/human/aging/div/",
-    "/human/aging/sample_map.txt", 10000)
     """
 
     print("Core diversity analyses...")
@@ -640,11 +574,7 @@ def full_analysis(inFolder, outFolder, depth, rdb, trimq, joining_method,
                   qcq, maxloose, fastq_p):
     global PR
     """
-    Full analysis will be done
-    using bbmerge with maxloose
-    quality control with q=19
-    using gg database for otu-picking and chimera removal
-    set the depth of diversity analysis to 10000
+    
     """
 
     trimmed = asfolder(outFolder + PR['Ftrimmed'])
@@ -687,11 +617,6 @@ def stop_at_quality_control(inFolder, outFolder, joining_method, trimq,
                             qcq, maxloose, fastq_p):
     global PR
     """
-    Full analysis will be done
-    using bbmerge with maxloose
-    quality control with q=19
-    using gg database for otu-picking and chimera removal
-    set the depth of diversity analysis to 10000
     """
 
     trimmed = asfolder(outFolder + PR['Ftrimmed'])
@@ -710,14 +635,11 @@ def stop_at_quality_control(inFolder, outFolder, joining_method, trimq,
 
 def stop_at_chimera_removal(inFolder, outFolder, rdb, trimq, joining_method,
                             qcq, maxloose, fastq_p):
+    """
+
+    """
+
     global PR
-    """
-    Full analysis will be done
-    using bbmerge with maxloose
-    quality control with q=19
-    using gg database for otu-picking and chimera removal
-    set the depth of diversity analysis to 10000
-    """
 
     trimmed = asfolder(outFolder + PR['Ftrimmed'])
     merged = asfolder(outFolder + PR['Fmerged'])
@@ -737,11 +659,7 @@ def stop_at_chimera_removal(inFolder, outFolder, rdb, trimq, joining_method,
 
 def start_otu_pickng(inFolder, outFolder, depth, rdb):
     """
-    Full analysis will be done
-    using bbmerge with maxloose
-    quality control with q=19
-    using gg database for otu-picking and chimera removal
-    set the depth of diversity analysis to 10000
+
     """
     global PR
     chi = asfolder(inFolder)
