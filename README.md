@@ -62,11 +62,13 @@ Auto-q determines R1 and R2 using the names of the files, please do not modify t
 
 ```
 usage: auto-q.py [-h] -i INPUT -o OUTPUT [-b BEGINWITH] [-t TRIM_THRESHOLD]
-                 [-s STOP_AT] [-j JOINING_METHOD] [-d FASTQ_P]
-                 [-q QC_THRESHOLD] [-c CONFIGFILE]
+                 [-s STOP_AT] [-j JOINING_METHOD] [-p FASTQ_P]
+                 [-q QC_THRESHOLD] [--continuation_reference C_REF]
+                 [--continuation_otu_id C_OTU_ID] [-c CONFIGFILE]
                  [--adapter ADAPTER_REFERENCE] [-a MAPPING_FILE]
-                 [-p PARAMETER_FILE_NAME] [-n NUMBER_OF_CORES] [-f] [-m]
-                 [-r RDB] [-e DEPTH] [--ml MINIMUM_LENGTH]
+                 [--parameter_file_name PARAMETER_FILE_NAME]
+                 [-n NUMBER_OF_CORES] [-f] [-m] [-r RDB] [-e DEPTH]
+                 [--ml MINIMUM_LENGTH]
 
 ```
 
@@ -80,13 +82,17 @@ optional arguments:
   -t TRIM_THRESHOLD     phred quality threshold for trimming [10]
   -s STOP_AT            stop at [chimera_removal\]
   -j JOINING_METHOD     choose the merging method (fastq-join) or (bbmerge)
-  -d FASTQ_P            Percentage of maximum difference in fastq-join [16]
+  -p FASTQ_P            Percentage of mismatch fastq-join [16]
   -q QC_THRESHOLD       quality control phred threshold [19]
+  --continuation_reference C_REF
+                        Reference sequence for continuation
+  --continuation_otu_id C_OTU_ID
+                        continuation new reference set id
   -c CONFIGFILE         Configuration file name [qiime.cfg]
   --adapter ADAPTER_REFERENCE
                         Adapters reference file
   -a MAPPING_FILE       Mapping file name
-  -p PARAMETER_FILE_NAME
+  --parameter_file_name PARAMETER_FILE_NAME
                         The name of the parameter file [if not assigned is
                         automatically produced using configuration file
   -n NUMBER_OF_CORES    Number of cores to be used for the analysis [2]

@@ -1,36 +1,12 @@
 #! /usr/bin/env python
 from __future__ import unicode_literals
 # coding: utf-8
-# import sys
-
-## more to do:
-
-
-# 1. log file
-# 2. save parameter file and configuration file in results folder
-# 3. merge fasta files before closed reference otu picking or use filtering
-## 4. remove primers from 3' end and 5'end (length will be decided by Park san)
-## 5. remove short reads < 380
-## remove phix should be done using bbduk with phix174_ill.ref.fadrr
-
-
-## updates:
-# 0.2.4 Using fastq-join with trimming 10 and p 16 with silva as default
-## 0.2.5: added close reference otu picking using -reference tag: default is open # removed
-## 0.2.5: added beginwith: start with either otu_picking or diversity_analysis
-## with diversity analysis mapping file is required
-## 0.2.6 added force trim left for R1 .. 21 bases in trimming step using python script
-## 0.2.6 added force trim left for R2 .. 17 bases in trimming step using python script
-## 0.2.6 remove short reads < 380
-## 0.2.6 remove adapter sequence using bbduk
-
-
 
 import logging
 import datetime
-import os               # operation system packages
-import configparser     # a package to parse INI file or confige file.
-import argparse         # a package to parse commandline arguments.
+import os  # operation system packages
+import configparser  # a package to parse INI file or confige file.
+import argparse  # a package to parse commandline arguments.
 import sys
 from re import sub
 
@@ -38,14 +14,15 @@ from subprocess import call  # to run command line scripts
 from subprocess import Popen, PIPE, check_output
 from multiprocessing.dummy import Pool as Pool
 
-__version__ = '0.2.6'
+__version__ = '0.2.7'
 __author__ = "Attayeb Mohsen"
-__date__ = "19/10/2017"
+__date__ = "18/12/2017"
 
 starting_message = """ Microbiome analysis using multiple methods
     Version: %s
-    Date: %s 
-    National Institutes of Biomedical Innovation, Health, and Nutrition\n""" % (__version__, __date__)
+    Date: %s
+    National Institutes of Biomedical Innovation, Health, and Nutrition\n""" % \
+                   (__version__, __date__)
 
 ID = str(datetime.datetime.now())
 ID = ID.replace(" ", "")
@@ -84,6 +61,7 @@ def remove_short_reads(infqfile, outfqfile, length):
     infq.close()
     outfq.close()
 
+
 def asfolder(folder):
     """
     Add "/" at the end of the folder if not inserted
@@ -99,7 +77,6 @@ def asfolder(folder):
         return (folder)
 
 
-
 def execute(command, shell):
     """
     Execute command using os package and return output to log file
@@ -108,7 +85,8 @@ def execute(command, shell):
     :type command: str
     :param shell: Takes either True or False
     :type shell: boolean
-    :return: Run the command in the background and save the output to the logging file.
+    :return: Run the command in the background and save the
+    output to the logging file.
 
     """
 
@@ -119,7 +97,6 @@ def execute(command, shell):
         loginfo(output.encode('utf-8'))
     if error != b"":
         logwarning(error.encode('utf-8'))
-
 
 
 def loginfo(message):
@@ -165,8 +142,7 @@ def get_configuration():
 
 
 def locate_bbmap():
-    """
-
+    """locate the folder of bbmap
     :return:
     """
     folder = check_output(["locate", "bbmerge.sh"]).decode("utf-8")
@@ -190,7 +166,8 @@ def check_before_start():
         condition = condition and os.path.isfile(PR['silva_core_alignment'])
         if not condition:
             raise IOError("Can not find Silva database files, "
-                          "please check the configuration file: %s to set up the correct folder" % PR['ConfigFile'])
+                          "please check the configuration file: %s "
+                          "to set up the correct folder" % PR['ConfigFile'])
     if PR['rdb'] == "gg":
         condition = True
         condition = condition and os.path.isfile(PR['gg_taxonomy'])
@@ -281,7 +258,7 @@ def primertrim(infqfile, outfqfile, length):
     outfq.close()
 
 
-def trimfolder(in_folder, out_folder, trimq, ftrim=True):
+def trimfolder(inFolder, outFolder, trimq, ftrim=True):
     """
     Trim the right side of fastq files using BBDUK,
     in_folder: input is a folder of fastq files with pair ends
@@ -297,54 +274,40 @@ def trimfolder(in_folder, out_folder, trimq, ftrim=True):
 
     import os
 
-    in_folder = asfolder(in_folder)
-    out_folder = asfolder(out_folder)
+    inFolder = asfolder(inFolder)
+    outFolder = asfolder(outFolder)
 
-    files = os.listdir(in_folder)
+    files = os.listdir(inFolder)
     files.sort()
     ins1 = [x for x in files if "_R1_" in x]
     ins2 = [x.replace("_R1_", "_R2_") for x in ins1]
-    os.mkdir(out_folder)
+    os.mkdir(outFolder)
     # call("mkdir -p %s" % out_folder, shell=True)
     print("Trimming...")
 
     # get_ipython().system(u'mkdir -p {out_folder}')
     def process(i):
-        in1 = in_folder + ins1[i]
-        in2 = in_folder + ins2[i]
+        in1 = inFolder + ins1[i]
+        in2 = inFolder + ins2[i]
         print("%s and %s" % (ins1[i], ins2[i]))
-        out1 = out_folder + ins1[i]
-        out2 = out_folder + ins2[i]
-        out1_temp1 = out_folder + "temp1_" + ins1[i]
-        out2_temp1 = out_folder + "temp1_" + ins2[i]
+        out1 = outFolder + ins1[i]
+        out2 = outFolder + ins2[i]
+        out1_temp1 = outFolder + "temp1_" + ins1[i]
+        out2_temp1 = outFolder + "temp1_" + ins2[i]
 
         # forctrimleft was added
         if ftrim:
             primertrim(in1, out1_temp1, 17)
             primertrim(in2, out2_temp1, 21)
-            # execute(
-            #    "bbduk.sh -Xmx1000m -in=%s -out=%s -forcetrimleft=17" % (in1, out1_temp1),
-            #    shell=True)
-            # execute(
-            #    "bbduk.sh -Xmx1000m -in=%s -out=%s -forcetrimleft=21" % (in2, out2_temp1),
-            #    shell=True)
-            #execute(
-            #    "bbduk.sh -Xmx1000m -in1=%s -in2=%s -out1=%s -out2=%s -qtrim=r -trimq=%d" %
-            #    (out1_temp1, out2_temp1, out1_temp2, out2_temp2, trimq),
-            #    shell=True)
-            #os.remove(out1_temp1)
-            #os.remove(out2_temp1)
+
         else:
             out1_temp1 = in1
             out2_temp1 = in2
 
         if PR['adapter_ref'] != None:
-            #print(PR['adapter_ref'])
-            #execute(
-            #    "bbduk.sh -Xmx1000m -in1=%s -in2=%s -out1=%s -out2=%s ref=%s, ktrim=r k=23 mink=11 hdist=1 tpe tbo" %
-            #    (out1_temp2, out2_temp2, out1, out2, PR['adapter_ref']), shell=True)
 
-            execute("bbduk.sh -Xmx1000m -in1=%s -in2=%s -out1=%s -out2=%s -outm=stdout.fa -ref=%s -qtrim=r -trimq=%d -k=18 -ktrim=f" %
+            execute(
+                "bbduk.sh -Xmx1000m -in1=%s -in2=%s -out1=%s -out2=%s -outm=stdout.fa -ref=%s -qtrim=r -trimq=%d -k=18 -ktrim=f" %
                 (out1_temp1, out2_temp1, out1, out2, PR['adapter_ref'], trimq), shell=True)
         else:
             execute(
@@ -358,7 +321,7 @@ def trimfolder(in_folder, out_folder, trimq, ftrim=True):
     p.map(process, range(len(ins1)))
 
 
-def mergefolderbb(in_folder, out_folder, maxloose=True):
+def mergefolderbb(inFolder, outFolder, maxloose=True):
     """
     Merge a folder of pair ends fastq files using BBMERGE
     in_folder : input
@@ -376,29 +339,26 @@ def mergefolderbb(in_folder, out_folder, maxloose=True):
 
 
     """
-    in_folder = asfolder(in_folder)
-    out_folder = asfolder(out_folder)
+    inFolder = asfolder(inFolder)
+    outFolder = asfolder(outFolder)
 
     import os
-    files = os.listdir(in_folder)
+    files = os.listdir(inFolder)
     files.sort()
 
     ins1 = [x for x in files if "_R1_" in x]
     ins2 = [x.replace("_R1_", "_R2_") for x in ins1]
     outs = [x.replace("_L001_R1_001", "") for x in ins1]
-    # get_ipython().system(u'mkdir -p {out_folder}')
-    os.mkdir(out_folder)
-    # call("mkdir -p %s" % out_folder, shell=True)
+    os.mkdir(outFolder)
     print("Merging ...")
 
     def process(i):
 
-        in1 = in_folder + ins1[i]
-        in2 = in_folder + ins2[i]
-
+        in1 = inFolder + ins1[i]
+        in2 = inFolder + ins2[i]
 
         print("%s and %s" % (ins1[i], ins2[i]))
-        out = out_folder + outs[i]
+        out = outFolder + outs[i]
         if maxloose:
             execute("bbmerge.sh -in1=%s -in2=%s -out=%s -maxloose=t -ignorebadquality" % (in1, in2, out), shell=True)
 
@@ -412,7 +372,7 @@ def mergefolderbb(in_folder, out_folder, maxloose=True):
     print("Merging finished.")
 
 
-def mergefolderfastq(in_folder, out_folder, pp):
+def mergefolderfastq(inFolder, outFolder, pp):
     """
     Merge folder of fastq files following illumina naming system
     using fastq-join
@@ -425,10 +385,10 @@ def mergefolderfastq(in_folder, out_folder, pp):
         "/home/data/merged-human/", p=12)
     """
     global PR
-    in_folder = asfolder(in_folder)
-    out_folder = asfolder(out_folder)
+    inFolder = asfolder(inFolder)
+    outFolder = asfolder(outFolder)
 
-    files = os.listdir(in_folder)
+    files = os.listdir(inFolder)
 
     files.sort()
 
@@ -436,18 +396,14 @@ def mergefolderfastq(in_folder, out_folder, pp):
     ins2 = [x.replace("_R1_", "_R2_") for x in ins1]
 
     outs = [x.replace("_L001_R1_001", "") for x in ins1]
-    os.mkdir(out_folder)
-
-    # call("mkdir -p %s" % out_folder, shell=True)
-
+    os.mkdir(outFolder)
 
     def process(i):
-        in1 = in_folder + ins1[i]
-        in2 = in_folder + ins2[i]
+        in1 = inFolder + ins1[i]
+        in2 = inFolder + ins2[i]
         print("Merging: %s and %s " % (ins1[i], ins2[i]))
-        out = out_folder + "temp_" + outs[i]
-        out_final = out_folder + outs[i]
-        # out = out_final
+        out = outFolder + "temp_" + outs[i]
+        out_final = outFolder + outs[i]
         execute("fastq-join -p %d %s %s -o %s" % (pp, in1, in2, out), shell=True)
         os.remove("%sun1" % out)
         os.remove("%sun2" % out)
@@ -459,7 +415,7 @@ def mergefolderfastq(in_folder, out_folder, pp):
     p.map(process, range(len(ins1)))
 
 
-def qualitycontrol(in_folder, out_folder, q):
+def qualitycontrol(inFolder, outFolder, q):
     """
     Using split_libraries script from QIIME
     Out_put is fasta files
@@ -470,27 +426,27 @@ def qualitycontrol(in_folder, out_folder, q):
     qualitycontrol("data1/merged/", "/data1/qc/", q=19)
 
     """
-    in_folder = asfolder(in_folder)
-    out_folder = asfolder(out_folder)
+    inFolder = asfolder(inFolder)
+    outFolder = asfolder(outFolder)
 
     import os
-    files = os.listdir(in_folder)
+    files = os.listdir(inFolder)
     files.sort()
-    os.mkdir(out_folder)
+    os.mkdir(outFolder)
 
     # call("mkdir -p %s " % out_folder, shell=True)
 
     def process(i):
-        temp = out_folder + "temp" + i + "/"
+        temp = outFolder + "temp" + i + "/"
         print("Quality control: %s" % i)
-        sampleid = i.replace(".fastq", "")
-        infile = in_folder + i
-        outfile = out_folder + i.replace(".fastq", ".fasta")
+        sampleId = i.replace(".fastq", "")
+        inFile = inFolder + i
+        outFile = outFolder + i.replace(".fastq", ".fasta")
         execute("""split_libraries_fastq.py -i %s -o %s --barcode_type not-barcoded --sample_ids %s -q %s""" % (
-            infile, temp, sampleid, q), shell=True)
+            inFile, temp, sampleId, q), shell=True)
 
-        tempfile = temp + "seqs.fna"
-        call("mv %s %s" % (tempfile, outfile), shell=True)
+        tempFile = temp + "seqs.fna"
+        call("mv %s %s" % (tempFile, outFile), shell=True)
         call("rm -r %s" % temp, shell=True)
 
     p = Pool(5)
@@ -498,7 +454,7 @@ def qualitycontrol(in_folder, out_folder, q):
     print("Quality control finished.")
 
 
-def removechimera(in_folder, out_folder, rdb="silva"):
+def removechimera(inFolder, outFolder, rdb="silva"):
     """
     removechimera(in_folder,out_folder, silva=False)
     GreenGenes database are used as default
@@ -515,29 +471,29 @@ def removechimera(in_folder, out_folder, rdb="silva"):
     """
     global PR
     import os
-    in_folder = asfolder(in_folder)
-    out_folder = asfolder(out_folder)
+    inFolder = asfolder(inFolder)
+    outFolder = asfolder(outFolder)
 
-    files = os.listdir(in_folder)
+    files = os.listdir(inFolder)
     files.sort()
 
-    os.mkdir(out_folder)
+    os.mkdir(outFolder)
 
     # call("mkdir -p %s" % out_folder, shell=True)
 
     def process(i):
         print("Chimera removal: %s" % i)
-        temp = out_folder + "temp" + i + "/"
+        temp = outFolder + "temp" + i + "/"
         if rdb == "silva":
             execute("identify_chimeric_seqs.py -i %s -m usearch61 -o %s -r %s"
-                    % (in_folder + i, temp + i, PR['silva_chim_ref']),
+                    % (inFolder + i, temp + i, PR['silva_chim_ref']),
                     shell=True)
         else:
             execute("identify_chimeric_seqs.py -i %s -m usearch61 -o %s -r %s" % (
-                in_folder + i, temp + i, PR['gg_chim_ref']),
+                inFolder + i, temp + i, PR['gg_chim_ref']),
                     shell=True)
 
-        execute("filter_fasta.py -f %s -o %s -s %s/non_chimeras.txt" % (in_folder + i, out_folder + i, temp + i),
+        execute("filter_fasta.py -f %s -o %s -s %s/non_chimeras.txt" % (inFolder + i, outFolder + i, temp + i),
                 shell=True)
         call("rm -r %s" % temp, shell=True)
 
@@ -545,7 +501,7 @@ def removechimera(in_folder, out_folder, rdb="silva"):
     p.map(process, files)
 
 
-def pickotus(in_folder, out_folder, rdb="silva", fungus=False):
+def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
     """
     pickotus(in_folder, out_folder, silva=False)
     input (in_folder): is a folder of fasta files
@@ -556,48 +512,76 @@ def pickotus(in_folder, out_folder, rdb="silva", fungus=False):
     """
 
     global PR
-    in_folder = asfolder(in_folder)
-    out_folder = asfolder(out_folder)
+    inFolder = asfolder(inFolder)
+    outFolder = asfolder(outFolder)
 
-    infolder = in_folder + "*.fasta"
+    inFolder_fasta = inFolder + "*.fasta"
     print("Otu picking...")
+    if PR['c_ref'] != "none":
+        if rdb == "silva":
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s -r %s -a -O %d -n %s"
+                    % (
+                        inFolder_fasta, outFolder, PR['parameter_file_name'], PR['c_ref'], PR['number_of_cores'], PR['c_otu_id']),
+                    shell=True)
+            #execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
+            #        % (out_folder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
+            #           out_folder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
+            #           PR['silva_reference_seqs']), shell=True)
 
-    if rdb == "silva":
-        execute("pick_open_reference_otus.py -i %s -o %s -p %s -r %s -a -O %d "
-                % (infolder, out_folder, PR['parameter_file_name'], PR['silva_reference_seqs'], PR['number_of_cores']),
-                shell=True)
-        execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
-                % (out_folder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
-                   out_folder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
-                   PR['silva_reference_seqs']), shell=True)
+        elif fungus:
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s -a -O %d -n %s --suppress_align_and_tree"
+                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], PR['number_of_cores'], PR['c_otu_id']), shell=True)
 
-    elif fungus:
-        execute("pick_open_reference_otus.py -i %s -o %s -p %s -a -O %d --supress_align_and_tree"
-                % (infolder, out_folder, PR['parameter_file_name'], PR['number_of_cores']), shell=True)
+        else:
+            execute("pick_open_reference_otus.py -i %s -o %s -r %s -p %s -a -O %d -n %s"
+                    % (inFolder_fasta, outFolder,
+                       PR['c_ref'], PR['parameter_file_name'],
+                       PR['number_of_cores'], PR['c_otu_id']), shell=True)
+
+            #execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
+            #        % (out_folder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
+            #           out_folder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
+            #           PR['gg_reference_seqs']), shell=True)
+
+
 
     else:
-        execute("pick_open_reference_otus.py -i %s -o %s -r %s -p %s -a -O %d"
-                % (infolder, out_folder,
-                   PR['gg_reference_seqs'], PR['parameter_file_name'],
-                   PR['number_of_cores']), shell=True)
+        if rdb == "silva":
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s -r %s -a -O %d -n %s"
+                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], PR['silva_reference_seqs'], PR['number_of_cores'],
+                       PR['c_otu_id']),
+                    shell=True)
+            execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
+                    % (outFolder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
+                       outFolder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
+                       PR['silva_reference_seqs']), shell=True)
 
-        execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
-                % (out_folder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
-                   out_folder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
-                   PR['gg_reference_seqs']), shell=True)
+        elif fungus:
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s -a -O %d -n %s--suppress_align_and_tree"
+                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], PR['number_of_cores'],
+                       PR['c_otu_id']), shell=True)
+
+        else:
+            execute("pick_open_reference_otus.py -i %s -o %s -r %s -p %s -a -O %d -n %s"
+                    % (inFolder_fasta, outFolder,
+                       PR['gg_reference_seqs'], PR['parameter_file_name'],
+                       PR['number_of_cores'], PR['c_otu_id']), shell=True)
+
+            execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
+                    % (outFolder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
+                       outFolder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
+                       PR['gg_reference_seqs']), shell=True)
 
 
-def writedf(out_file, ids, sampleids):
-    f = open(out_file, "w+")
+def writedf(outFile, ids, sampleIds):
+    f = open(outFile, "w+")
     f.write("#SampleID\tBarcodeSequence\tLinkerPrimerSequence\tRead\tFile\tDescription\n")
     for x in range(len(ids)):
-        f.write("%s\t\t\tR1\t%s\tsingle_file\n"%(ids[x],sampleids[x] ))
+        f.write("%s\t\t\tR1\t%s\tsingle_file\n" % (ids[x], sampleIds[x]))
     f.close()
 
 
-
-
-def create_map(in_folder, out_file):
+def create_map(inFolder, outFile):
     """
     create_map(in_folder, out_file)
     in_folder: is the folder: results from otu picking
@@ -611,17 +595,17 @@ def create_map(in_folder, out_file):
     "/human/experiments/analyzed/samples_map.txt")
 
     """
-    in_folder = asfolder(in_folder)
+    inFolder = asfolder(inFolder)
     print("Writing mapping file")
     import os
-    sampleids = os.listdir(in_folder)
-    ids = [x.replace(".fasta", "") for x in sampleids]
+    sampleIds = os.listdir(inFolder)
+    ids = [x.replace(".fasta", "") for x in sampleIds]
     ids = [x.split("_")[0] for x in ids]
     d = {'#SampleID': ids}
-    writedf(out_file, ids, sampleids)
+    writedf(outFile, ids, sampleIds)
 
 
-def corediv(in_folder, out_folder, mapping_file, depth):
+def corediv(inFolder, outFolder, mappingFile, depth):
     """
     corediv(in_folder, out_folder, mapping_file, depth)
     in_folder: the otus folder
@@ -633,27 +617,26 @@ def corediv(in_folder, out_folder, mapping_file, depth):
     """
 
     print("Core diversity analyses...")
-    in_folder = asfolder(in_folder)
-    out_folder = asfolder(out_folder)
+    inFolder = asfolder(inFolder)
+    outFolder = asfolder(outFolder)
     if PR['fungus']:
-        biom = in_folder + "otu_table_mc2_w_tax.biom"
+        biom = inFolder + "otu_table_mc2_w_tax.biom"
     else:
-        biom = in_folder + "otu_table_mc2_w_tax_no_pynast_failures.biom"
-        biom_singleton = in_folder + "otu_table_mc2_w_tax_no_pynast_failures_singleton_filtered.biom"
-    tree = in_folder + "rep_set.tre"
+        biom = inFolder + "otu_table_mc2_w_tax_no_pynast_failures.biom"
+    tree = inFolder + "rep_set.tre"
     # get_ipython().system(
     #    u'core_diversity_analyses.py -i {biom}     -o {out_folder}     -m {mapping_file}     -t {tree}     -e {depth}')
     if PR['fungus']:
         execute("core_diversity_analyses.py -i %s -o %s -m %s -e %d --nonphylogenetic_diversity" % (
-            biom, out_folder, mapping_file, depth),
+            biom, outFolder, mappingFile, depth),
                 shell=True)
     else:
         execute(
-            "core_diversity_analyses.py -i %s -o %s -m %s -t %s -e %d" % (biom, out_folder, mapping_file, tree, depth),
+            "core_diversity_analyses.py -i %s -o %s -m %s -t %s -e %d" % (biom, outFolder, mappingFile, tree, depth),
             shell=True)
 
 
-def full_analysis(in_folder, out_folder, depth, rdb, trimq, joining_method,
+def full_analysis(inFolder, outFolder, depth, rdb, trimq, joining_method,
                   qcq, maxloose, fastq_p):
     global PR
     """
@@ -664,14 +647,14 @@ def full_analysis(in_folder, out_folder, depth, rdb, trimq, joining_method,
     set the depth of diversity analysis to 10000
     """
 
-    trimmed = asfolder(out_folder + PR['Ftrimmed'])
-    merged = asfolder(out_folder + PR['Fmerged'])
-    qc = asfolder(out_folder + PR['Fqc'])
-    chi = asfolder(out_folder + PR['Fchi'])
-    otus = asfolder(out_folder + PR['Fotus'])
-    div = asfolder(out_folder + PR['Fdiv'])
+    trimmed = asfolder(outFolder + PR['Ftrimmed'])
+    merged = asfolder(outFolder + PR['Fmerged'])
+    qc = asfolder(outFolder + PR['Fqc'])
+    chi = asfolder(outFolder + PR['Fchi'])
+    otus = asfolder(outFolder + PR['Fotus'])
+    div = asfolder(outFolder + PR['Fdiv'])
 
-    trimfolder(in_folder, trimmed, trimq)
+    trimfolder(inFolder, trimmed, trimq)
     if joining_method == "fastq-join":
         mergefolderfastq(trimmed, merged, fastq_p)
     elif joining_method == "bbmerge":
@@ -687,11 +670,11 @@ def full_analysis(in_folder, out_folder, depth, rdb, trimq, joining_method,
     corediv(otus, div, PR['mapping_file'], depth)
 
 
-def stop_at_merging(in_folder, out_folder, trimq, joining_method, maxloose, fastq_p):
+def stop_at_merging(inFolder, outFolder, trimq, joining_method, maxloose, fastq_p):
     global PR
-    trimmed = asfolder(out_folder + PR['Ftrimmed'])
-    merged = asfolder(out_folder) + PR['Fmerged']
-    trimfolder(in_folder, trimmed, trimq)
+    trimmed = asfolder(outFolder + PR['Ftrimmed'])
+    merged = asfolder(outFolder) + PR['Fmerged']
+    trimfolder(inFolder, trimmed, trimq)
     if joining_method == "fastq-join":
         mergefolderfastq(trimmed, merged, fastq_p)
     elif joining_method == "bbmerge":
@@ -700,7 +683,7 @@ def stop_at_merging(in_folder, out_folder, trimq, joining_method, maxloose, fast
         raise ("%s: unknown merging metod method" % joining_method)
 
 
-def stop_at_quality_control(in_folder, out_folder, joining_method, trimq,
+def stop_at_quality_control(inFolder, outFolder, joining_method, trimq,
                             qcq, maxloose, fastq_p):
     global PR
     """
@@ -711,11 +694,11 @@ def stop_at_quality_control(in_folder, out_folder, joining_method, trimq,
     set the depth of diversity analysis to 10000
     """
 
-    trimmed = asfolder(out_folder + PR['Ftrimmed'])
-    merged = asfolder(out_folder + PR['Fmerged'])
-    qc = asfolder(out_folder + PR['Fqc'])
+    trimmed = asfolder(outFolder + PR['Ftrimmed'])
+    merged = asfolder(outFolder + PR['Fmerged'])
+    qc = asfolder(outFolder + PR['Fqc'])
 
-    trimfolder(in_folder, trimmed, trimq)
+    trimfolder(inFolder, trimmed, trimq)
     if joining_method == "fastq-join":
         mergefolderfastq(trimmed, merged, fastq_p)
     elif joining_method == "bbmerge":
@@ -725,7 +708,7 @@ def stop_at_quality_control(in_folder, out_folder, joining_method, trimq,
     qualitycontrol(merged, qc, qcq)
 
 
-def stop_at_chimera_removal(in_folder, out_folder, rdb, trimq, joining_method,
+def stop_at_chimera_removal(inFolder, outFolder, rdb, trimq, joining_method,
                             qcq, maxloose, fastq_p):
     global PR
     """
@@ -736,12 +719,12 @@ def stop_at_chimera_removal(in_folder, out_folder, rdb, trimq, joining_method,
     set the depth of diversity analysis to 10000
     """
 
-    trimmed = asfolder(out_folder + PR['Ftrimmed'])
-    merged = asfolder(out_folder + PR['Fmerged'])
-    qc = asfolder(out_folder + PR['Fqc'])
-    chi = asfolder(out_folder + PR['Fchi'])
+    trimmed = asfolder(outFolder + PR['Ftrimmed'])
+    merged = asfolder(outFolder + PR['Fmerged'])
+    qc = asfolder(outFolder + PR['Fqc'])
+    chi = asfolder(outFolder + PR['Fchi'])
 
-    trimfolder(in_folder, trimmed, trimq)
+    trimfolder(inFolder, trimmed, trimq)
     if joining_method == "fastq-join":
         mergefolderfastq(trimmed, merged, fastq_p)
     elif joining_method == "bbmerge":
@@ -752,8 +735,7 @@ def stop_at_chimera_removal(in_folder, out_folder, rdb, trimq, joining_method,
     removechimera(qc, chi, rdb)
 
 
-def start_otu_pickng(in_folder, out_folder, depth, rdb):
-    global PR
+def start_otu_pickng(inFolder, outFolder, depth, rdb):
     """
     Full analysis will be done
     using bbmerge with maxloose
@@ -761,21 +743,23 @@ def start_otu_pickng(in_folder, out_folder, depth, rdb):
     using gg database for otu-picking and chimera removal
     set the depth of diversity analysis to 10000
     """
-
-    chi = asfolder(in_folder)
-    otus = asfolder(out_folder + PR['Fotus'])
-    div = asfolder(out_folder + PR['Fdiv'])
+    global PR
+    chi = asfolder(inFolder)
+    otus = asfolder(outFolder + PR['Fotus'])
+    div = asfolder(outFolder + PR['Fdiv'])
 
     pickotus(chi, otus, rdb)
+
     if create_mapping_file:
         create_map(chi, PR['mapping_file'])
+
     corediv(otus, div, PR['mapping_file'], depth)
 
 
-def start_diversity_analysis(in_folder, out_folder, mapping_file, depth):
-    otus = asfolder(in_folder)
-    div = asfolder(out_folder + PR['Fdiv'])
-    corediv(in_folder=otus, out_folder=div, mapping_file=mapping_file, depth=depth)
+def start_diversity_analysis(inFolder, outFolder, mapping_file, depth):
+    otus = asfolder(inFolder)
+    div = asfolder(outFolder + PR['Fdiv'])
+    corediv(inFolder=otus, outFolder=div, mappingFile=mapping_file, depth=depth)
 
 
 if __name__ == "__main__":
@@ -805,8 +789,8 @@ if __name__ == "__main__":
                         # "--trim_phred_quality_threshold",
                         dest="trim_threshold",
                         type=int,
-                        help="phred quality threshold for trimming [10]",
-                        default=10)
+                        help="phred quality threshold for trimming [12]",
+                        default=12)
     parser.add_argument("-s",
                         dest="stop_at",
                         type=str,
@@ -818,10 +802,10 @@ if __name__ == "__main__":
                         type=str,
                         default="fastq-join")
 
-    parser.add_argument("-d",
+    parser.add_argument("-p",
                         type=int,
                         dest="fastq_p",
-                        help="Percentage of maximum difference in fastq-join [16]",
+                        help="Percentage of mismatch fastq-join [16]",
                         default=16)
 
     parser.add_argument("-q",
@@ -829,6 +813,19 @@ if __name__ == "__main__":
                         type=int,
                         help="quality control phred threshold [19]",
                         default=19)
+
+    parser.add_argument("--continuation_reference",
+                        dest="c_ref",
+                        type=str,
+                        help="Reference sequence for continuation",
+                        default="none")
+
+    parser.add_argument("--continuation_otu_id",
+                        dest="c_otu_id",
+                        type=str,
+                        help="continuation new reference set id",
+                        default="New")
+
 
     parser.add_argument("-c",
                         dest="ConfigFile",
@@ -845,7 +842,7 @@ if __name__ == "__main__":
                         help="Mapping file name",
                         type=str)
 
-    parser.add_argument("-p",
+    parser.add_argument("--parameter_file_name",
                         help="The name of the parameter file [if not assigned is automatically produced using "
                              "configuration file",
                         type=str,
@@ -886,7 +883,6 @@ if __name__ == "__main__":
                         help="Minimum length of reads kept after merging [380]",
                         default=380)
 
-
     x = parser.format_usage()
     parser.usage = starting_message + x
     arg = parser.parse_args()
@@ -908,8 +904,10 @@ if __name__ == "__main__":
         # 'reference': arg.reference,
         'beginwith': arg.beginwith,
         'mapping_file': arg.mapping_file,
-        'adapter_ref' : arg.adapter_reference,
-        'minimum_length': arg.minimum_length})
+        'adapter_ref': arg.adapter_reference,
+        'minimum_length': arg.minimum_length,
+        'c_ref': arg.c_ref,
+        'c_otu_id': arg.c_otu_id})
 
     ## parameter_file
     get_configuration()
@@ -945,21 +943,21 @@ if __name__ == "__main__":
     [loginfo(str(P) + ": " + str(PR[P])) for P in PR]
 
     if arg.beginwith == "otu_picking":
-        start_otu_pickng(in_folder=PR['in_folder'],
-                         out_folder=PR['out_folder'],
+        start_otu_pickng(inFolder=PR['in_folder'],
+                         outFolder=PR['out_folder'],
                          rdb=PR['rdb'],
                          depth=PR['depth'])
 
     elif arg.beginwith == "diversity_analysis":
-        start_diversity_analysis(in_folder=PR['in_folder'],
-                                 out_folder=PR['out_folder'],
+        start_diversity_analysis(inFolder=PR['in_folder'],
+                                 outFolder=PR['out_folder'],
                                  depth=PR['depth'])
 
 
 
     elif arg.stop_at == "chimera_removal":
-        stop_at_chimera_removal(in_folder=PR['in_folder'],
-                                out_folder=PR['out_folder'],
+        stop_at_chimera_removal(inFolder=PR['in_folder'],
+                                outFolder=PR['out_folder'],
                                 rdb=PR['rdb'],
                                 joining_method=PR['joining_method'],
                                 fastq_p=PR['fastq_p'],
@@ -967,16 +965,16 @@ if __name__ == "__main__":
                                 qcq=PR['qcq'],
                                 trimq=PR['trimq'])
     elif arg.stop_at == "merging":
-        stop_at_merging(in_folder=PR['in_folder'],
-                        out_folder=PR['out_folder'],
+        stop_at_merging(inFolder=PR['in_folder'],
+                        outFolder=PR['out_folder'],
                         joining_method=PR['joining_method'],
                         fastq_p=PR['fastq_p'],
                         maxloose=PR['maxloose'],
                         trimq=PR['trimq'])
 
     elif arg.stop_at == "quality_control":
-        stop_at_quality_control(in_folder=PR['in_folder'],
-                                out_folder=PR['out_folder'],
+        stop_at_quality_control(inFolder=PR['in_folder'],
+                                outFolder=PR['out_folder'],
                                 joining_method=PR['joining_method'],
                                 fastq_p=PR['fastq_p'],
                                 maxloose=PR['maxloose'],
@@ -987,8 +985,8 @@ if __name__ == "__main__":
 
 
     else:
-        full_analysis(in_folder=PR['in_folder'],
-                      out_folder=PR['out_folder'],
+        full_analysis(inFolder=PR['in_folder'],
+                      outFolder=PR['out_folder'],
                       rdb=PR['rdb'],
                       joining_method=PR['joining_method'],
                       fastq_p=PR['fastq_p'],
