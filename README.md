@@ -79,7 +79,7 @@ optional arguments:
   -i INPUT              The folder where Fastq files are stored [required]
   -o OUTPUT             The folder of all results [required]
   -b BEGINWITH          begin with: [otu_picking], [diversity_analysis]
-  -t TRIM_THRESHOLD     phred quality threshold for trimming [10]
+  -t TRIM_THRESHOLD     phred quality threshold for trimming [12]
   -s STOP_AT            stop at [chimera_removal\]
   -j JOINING_METHOD     choose the merging method (fastq-join) or (bbmerge)
   -p FASTQ_P            Percentage of mismatch fastq-join [16]
