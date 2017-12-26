@@ -80,7 +80,7 @@ optional arguments:
   -o OUTPUT             The folder of all results [required]
   -b BEGINWITH          begin with: [otu_picking], [diversity_analysis]
   -t TRIM_THRESHOLD     phred quality threshold for trimming [12]
-  -s STOP_AT            stop at [chimera_removal\]
+  -s STOP_AT            stop at [chimera_removal]
   -j JOINING_METHOD     choose the merging method (fastq-join) or (bbmerge)
   -p FASTQ_P            Percentage of mismatch fastq-join [16]
   -q QC_THRESHOLD       quality control phred threshold [19]
@@ -106,7 +106,7 @@ optional arguments:
 
 ## Example:
 ```
-$ auto-q.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -t 12 -d 10 -r silva -n 10 -e 5000 -c /bin/auto-q/qiime.cfg 
+$ auto-q.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -t 12 -p 10 -r silva -n 10 -e 5000 -c /bin/auto-q/qiime.cfg 
 ```
 
 ## Results:
