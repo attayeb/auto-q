@@ -26,7 +26,7 @@ $ tar -zxvf BBMap_37.66.tar.gz && rm BBMap_37.66.tar.gz
 
 4. Install Auto-q by executing these commands in /home/qiime/bin/ :
 ```buildoutcfg
-$ git https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git 
+$ git clone https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git 
 ```
 Edit .bashrc in your home directory and add the following line at the end:
 ```buildoutcfg
@@ -51,7 +51,8 @@ R1 &rarr;  SampleName_S1_L001_R1_001.fastq.gz
 
 R2 &rarr;  SampleName_S1_L001_R2_001.fastq.gz
 
-keep a copy of the original compressed fastq files in a safe folder and use another copy after decompressing them. To decompress the fastq.gz file use this commnad inside the folder in terminal:
+keep a copy of the original compressed fastq files in a safe folder and use another copy after 
+decompressing them. To decompress the fastq.gz file use this commnad inside the folder in terminal:
 ```
 $ gunzip *.fastq.gz
 ``` 
@@ -75,32 +76,39 @@ usage: auto-q.py [-h] -i INPUT -o OUTPUT [-b BEGINWITH] [-t TRIM_THRESHOLD]
 
 ```
 optional arguments:
+  optional arguments:
   -h, --help            show this help message and exit
-  -i INPUT              The folder where Fastq files are stored [required]
-  -o OUTPUT             The folder of all results [required]
-  -b BEGINWITH          begin with: [otu_picking], [diversity_analysis]
-  -t TRIM_THRESHOLD     phred quality threshold for trimming [12]
-  -s STOP_AT            stop at [chimera_removal]
-  -j JOINING_METHOD     choose the merging method (fastq-join) or (bbmerge)
-  -p FASTQ_P            Percentage of mismatch fastq-join [16]
-  -q QC_THRESHOLD       quality control phred threshold [19]
-  --continuation_reference C_REF
+  -i Input folder       The folder where Fastq files are stored [required]
+  -o Output folder      The folder of all results [required]
+  -t Phred threshold    phred quality threshold for trimming [default: 12]
+  -p Percentage of mismatch
+                        Percentage of mismatch fastq-join [default: 16]
+  --adapter ADAPTER_REFERENCE
+                        Adapters reference file
+  -b Step               begin with: (otu_picking), (diversity_analysis)
+  -s Analysis step      Terminate the analysis at this step
+  -j Joining method     choose the merging method (fastq-join) or (bbmerge)
+                        [default: fastq-join]
+  -m                    Assign maxloose to be true for bbmerge [default:
+                        False]
+  -q Number             quality control phred threshold [default: 19]
+  --continuation_reference newref_seq.fna
                         Reference sequence for continuation
   --continuation_otu_id C_OTU_ID
                         continuation new reference set id
-  -c CONFIGFILE         Configuration file name [qiime.cfg]
-  --adapter ADAPTER_REFERENCE
-                        Adapters reference file
+  -r Reference database
+                        silva, greengenes [default: silva]
+  -c Configuration file name
+                        Configuration file name [default: qiime.cfg]
   -a MAPPING_FILE       Mapping file name
   --parameter_file_name PARAMETER_FILE_NAME
                         The name of the parameter file [if not assigned is
                         automatically produced using configuration file
-  -n NUMBER_OF_CORES    Number of cores to be used for the analysis [2]
-  -f                    Using Unite database for fungal samples[False]
-  -m                    Assign maxloose to be true for bbmerge [False]
-  -r RDB                Reference data base [silva, greengenes]
-  -e DEPTH              set the depth of diversity analyses [10000]
-  --ml MINIMUM_LENGTH   Minimum length of reads kept after merging [380]
+  -n Number of jobs     Number of cores to be used for the analysis [default:
+                        2]
+  -e DEPTH              set the depth of diversity analyses [default: 10000]
+  --ml MINIMUM_LENGTH   Minimum length of reads kept after merging [default:
+                        380]
 
 ```
 
