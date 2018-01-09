@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import logging
 import datetime
 import os  # operation system packages
-import configparser  # a package to parse INI file or confige file.
+import ConfigParser as configparser  # a package to parse INI file or confige file.
 import argparse  # a package to parse commandline arguments.
 import sys
 from re import sub
@@ -89,10 +89,9 @@ def execute(command, shell):
     output to the logging file.
 
     """
-
+    loginfo(command)
     p = Popen(command.split(), stderr=PIPE, stdout=PIPE)
     output, error = p.communicate()
-    loginfo(command)
     if output != b"":
         loginfo(output.encode('utf-8'))
     if error != b"":
@@ -142,7 +141,8 @@ def get_configuration():
 
 
 def locate_bbmap():
-    """locate the folder of bbmap
+    """
+    locate the folder of bbmap
     :return:
     """
     folder = check_output(["locate", "bbmerge.sh"]).decode("utf-8")
@@ -200,7 +200,7 @@ def write_parameter_file(parameter_file):
            'core_alignment': PR['silva_core_alignment'],
            'jobs_to_start': PR['number_of_cores'],
            'similarity': PR['similarity']}
-    elif PR['fungus'] == True:
+    elif PR['rdb'] == "unite":
         # pass
         parameter_string = """
         assign_taxonomy:id_to_taxonomy_fp\t%(taxonomy)s
@@ -460,17 +460,24 @@ def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
 
     """
 
+    # TODO : add no parallel option
     global PR
     inFolder = asfolder(inFolder)
     outFolder = asfolder(outFolder)
 
     inFolder_fasta = inFolder + "*.fasta"
     print("Otu picking...")
+    if PR['np']:
+        parallel_string = ""
+    else:
+        parallel_string = "-a -O %d" % PR['number_of_cores']
+
+
     if PR['c_ref'] != "none":
         if rdb == "silva":
-            execute("pick_open_reference_otus.py -i %s -o %s -p %s -r %s -a -O %d -n %s"
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s -r %s %s -n %s"
                     % (
-                        inFolder_fasta, outFolder, PR['parameter_file_name'], PR['c_ref'], PR['number_of_cores'], PR['c_otu_id']),
+                        inFolder_fasta, outFolder, PR['parameter_file_name'], PR['c_ref'], parallel_string, PR['c_otu_id']),
                     shell=True)
             #execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
             #        % (out_folder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
@@ -478,14 +485,14 @@ def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
             #           PR['silva_reference_seqs']), shell=True)
 
         elif fungus:
-            execute("pick_open_reference_otus.py -i %s -o %s -p %s -a -O %d -n %s --suppress_align_and_tree"
-                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], PR['number_of_cores'], PR['c_otu_id']), shell=True)
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s %s -n %s --suppress_align_and_tree"
+                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], parallel_string, PR['c_otu_id']), shell=True)
 
         else:
-            execute("pick_open_reference_otus.py -i %s -o %s -r %s -p %s -a -O %d -n %s"
+            execute("pick_open_reference_otus.py -i %s -o %s -r %s -p %s %s -n %s"
                     % (inFolder_fasta, outFolder,
                        PR['c_ref'], PR['parameter_file_name'],
-                       PR['number_of_cores'], PR['c_otu_id']), shell=True)
+                       parallel_string, PR['c_otu_id']), shell=True)
 
             #execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
             #        % (out_folder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
@@ -496,8 +503,8 @@ def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
 
     else:
         if rdb == "silva":
-            execute("pick_open_reference_otus.py -i %s -o %s -p %s -r %s -a -O %d -n %s"
-                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], PR['silva_reference_seqs'], PR['number_of_cores'],
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s -r %s %s -n %s"
+                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], PR['silva_reference_seqs'], parallel_string,
                        PR['c_otu_id']),
                     shell=True)
             execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
@@ -506,15 +513,15 @@ def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
                        PR['silva_reference_seqs']), shell=True)
 
         elif fungus:
-            execute("pick_open_reference_otus.py -i %s -o %s -p %s -a -O %d -n %s--suppress_align_and_tree"
-                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], PR['number_of_cores'],
+            execute("pick_open_reference_otus.py -i %s -o %s -p %s %s -n %s--suppress_align_and_tree"
+                    % (inFolder_fasta, outFolder, PR['parameter_file_name'], parallel_string,
                        PR['c_otu_id']), shell=True)
 
         else:
-            execute("pick_open_reference_otus.py -i %s -o %s -r %s -p %s -a -O %d -n %s"
+            execute("pick_open_reference_otus.py -i %s -o %s -r %s -p %s -n %s"
                     % (inFolder_fasta, outFolder,
                        PR['gg_reference_seqs'], PR['parameter_file_name'],
-                       PR['number_of_cores'], PR['c_otu_id']), shell=True)
+                       parallel_string, PR['c_otu_id']), shell=True)
 
             execute("filter_otus_from_otu_table.py -i %s -o %s --negate_ids_to_exclude -e %s"
                     % (outFolder + "otu_table_mc2_w_tax_no_pynast_failures.biom",
@@ -688,126 +695,146 @@ if __name__ == "__main__":
     parser.add_argument("-i",  # "--input",
                         dest="input",
                         # type=str,
-                        help="The folder where Fastq files are stored [required]",
+                        help="the input sequences filepath (fastq files) [REQUIRED]",
+                        metavar="Input folder",
                         required=True)
 
     parser.add_argument("-o",
                         # "--output",
                         dest="output",
                         type=str,
-                        help="The folder of all results [required]",
+                        metavar="Output folder",
+                        help="the output directory [REQUIRED]",
                         required=True)
 
-    parser.add_argument("-b",
-                        dest="beginwith",
-                        type=str,
-                        help="begin with: [otu_picking], [diversity_analysis]")
-
     parser.add_argument("-t",
-                        # "--trim_phred_quality_threshold",
                         dest="trim_threshold",
                         type=int,
-                        help="phred quality threshold for trimming [12]",
+                        metavar="trim_phred_threshold",
+                        help="phred quality threshold for trimming [default: 12]",
                         default=12)
-    parser.add_argument("-s",
-                        dest="stop_at",
-                        type=str,
-                        help="stop at [chimera_removal\]")
-
-    parser.add_argument("-j",
-                        dest='joining_method',
-                        help="choose the merging method (fastq-join) or (bbmerge) ",
-                        type=str,
-                        default="fastq-join")
 
     parser.add_argument("-p",
                         type=int,
                         dest="fastq_p",
-                        help="Percentage of mismatch fastq-join [16]",
+                        metavar="fastq-join p",
+                        help="fastq-join's percentage of mismatch [default: 16]",
                         default=16)
+
+    parser.add_argument("--adapter",
+                        metavar=None,
+                        dest="adapter_reference",
+                        help="Adapters reference file",
+                        type=str)
+
+    parser.add_argument("-b",
+                        dest="beginwith",
+                        type=str,
+                        metavar="starting step",
+                        choices=['otu_picking', 'diversity_analysis'],
+                        help="starting the analysis in the middle: (otu_picking), (diversity_analysis)")
+
+
+    parser.add_argument("-s",
+                        dest="stop_at",
+                        type=str,
+                        metavar="stop at",
+                        choices = ['merging', 'quality_control','chimera_removal'],
+                        help='terminate the analysis at this step [choices: (merging), (quality_control), (chimera_'
+                             'removal))')
+
+    parser.add_argument("-j",
+                        dest='joining_method',
+                        help="choose the merging method (fastq-join) or (bbmerge) [default: fastq-join]",
+                        type=str,
+                        metavar="joining method",
+                        choices = ['fastq-join', "bbmerge"],
+                        default="fastq-join")
+
+    parser.add_argument("-m",
+                        dest="maxloose",
+                        help="Assign maxloose to be true for bbmerge [default: False]",
+                        action="store_true")
 
     parser.add_argument("-q",
                         dest="qc_threshold",
                         type=int,
-                        help="quality control phred threshold [19]",
+                        metavar="quality control threshold",
+                        help="quality control phred threshold [default: 19]",
                         default=19)
 
     parser.add_argument("--continuation_reference",
                         dest="c_ref",
                         type=str,
-                        help="Reference sequence for continuation",
+                        metavar="newref_seq.fna",
+                        help="reference sequence for continuation. If you want to continue analysis using the reference "
+                             "data set from previous analysis. you can find it in the last sample otus folder new_refseqs.fna",
                         default="none")
 
     parser.add_argument("--continuation_otu_id",
                         dest="c_otu_id",
                         type=str,
-                        help="continuation new reference set id",
+                        metavar=None,
+                        help="continuation reference new otus ids",
                         default="New")
 
+    parser.add_argument("-r",
+                        dest="rdb",
+                        metavar="Reference database",
+                        help="silva, greengenes [default: silva]",
+                        choices=['silva', 'greengenes', 'unite'],
+                        type=str,
+                        default="silva")
 
     parser.add_argument("-c",
                         dest="ConfigFile",
                         type=str,
+                        metavar="Configuration file name",
                         default='qiime.cfg',
-                        help="Configuration file name [qiime.cfg]")
+                        help="Configuration file name [default: qiime.cfg]")
 
-    parser.add_argument("--adapter",
-                        dest="adapter_reference",
-                        help="Adapters reference file",
-                        type=str)
     parser.add_argument("-a",
                         dest="mapping_file",
                         help="Mapping file name",
+                        metavar="Mapping file name",
                         type=str)
 
     parser.add_argument("--parameter_file_name",
                         help="The name of the parameter file [if not assigned is automatically produced using "
                              "configuration file",
                         type=str,
+                        metavar=None,
                         dest="parameter_file_name")
 
     parser.add_argument("-n",
                         # "--number_of_cores",
-                        help="Number of cores to be used for the analysis [2]",
+                        help="Specify the number of jobs to start with [default: 2]",
                         type=int,
+                        metavar='Number of jobs',
                         dest="number_of_cores",
                         default=2)
-
-    parser.add_argument("-f",
-                        dest="fungus",
-                        help="Using Unite database for fungal samples[False]",
-                        action="store_true")
-
-    parser.add_argument("-m",
-                        dest="maxloose",
-                        help="Assign maxloose to be true for bbmerge [False]",
-                        action="store_true")
-
-    parser.add_argument("-r",
-                        dest="rdb",
-                        help="Reference data base [silva, greengenes]",
-                        type=str,
-                        default="silva")
 
     parser.add_argument("-e",
                         dest="depth",
                         type=int,
-                        help="set the depth of diversity analyses [10000]",
+                        metavar="Sampling depth",
+                        help="sampling depth for diversity analyses [default: 10000]",
                         default=10000)
 
     parser.add_argument("--ml",
                         dest="minimum_length",
+                        metavar='Minimum length',
                         type=int,
-                        help="Minimum length of reads kept after merging [380]",
+                        help="Minimum length of reads kept after merging [default: 380]",
                         default=380)
 
-    x = parser.format_usage()
-    parser.usage = starting_message + x
+    #x = parser.format_usage()
+    #parser.usage = starting_message #+ x
     arg = parser.parse_args()
 
     PR.update({
-        'in_folder': arg.input,
-        'out_folder': arg.output,
+        'in_folder': asfolder(arg.input),
+        'out_folder': asfolder(arg.output),
         'rdb': arg.rdb,
         'qcq': arg.qc_threshold,
         'maxloose': arg.maxloose,
@@ -815,11 +842,8 @@ if __name__ == "__main__":
         'joining_method': arg.joining_method,
         'fastq_p': arg.fastq_p,
         'depth': arg.depth,
-        'fungus': arg.fungus,
         'ConfigFile': arg.ConfigFile,
-        # 'automatic_parameter_file': arg.automatic_parameter_file,
         'parameter_file_name': arg.parameter_file_name,
-        # 'reference': arg.reference,
         'beginwith': arg.beginwith,
         'mapping_file': arg.mapping_file,
         'adapter_ref': arg.adapter_reference,
@@ -827,12 +851,17 @@ if __name__ == "__main__":
         'c_ref': arg.c_ref,
         'c_otu_id': arg.c_otu_id})
 
+
     ## parameter_file
     get_configuration()
     check_before_start()
+    if PR['rdb'] == 'unite':
+        PR['fungus'] = True
     PR['others'] = asfolder(PR['out_folder'] + PR['Fothers'])
     PR['number_of_cores'] = arg.number_of_cores
-    ## find if the output folder is present or not
+    if PR['number_of_cores'] == 1:
+        PR['np'] = True
+
     if (os.path.isdir(PR['out_folder'])):
         sys.exit()
     else:
@@ -853,7 +882,7 @@ if __name__ == "__main__":
         os.mkdir(PR['others'])
 
     logging.basicConfig(filename=PR['others'] + "log.txt",
-                        format='%(asctime)s %(levelname)s \n %(message)s',
+                        format='%(levelname)s \n %(message)s',
                         level=logging.DEBUG)
 
     number_of_cores = PR['number_of_cores']
