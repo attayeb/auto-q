@@ -857,6 +857,8 @@ if __name__ == "__main__":
     check_before_start()
     if PR['rdb'] == 'unite':
         PR['fungus'] = True
+    else:
+        PR['fungus'] = False
     PR['others'] = asfolder(PR['out_folder'] + PR['Fothers'])
     PR['number_of_cores'] = arg.number_of_cores
     if PR['number_of_cores'] == 1:
