@@ -863,6 +863,8 @@ if __name__ == "__main__":
     PR['number_of_cores'] = arg.number_of_cores
     if PR['number_of_cores'] == 1:
         PR['np'] = True
+    else:
+        PR['np'] = False
 
     if (os.path.isdir(PR['out_folder'])):
         sys.exit()
