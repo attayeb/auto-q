@@ -62,52 +62,57 @@ Auto-q determines R1 and R2 using the names of the files, please do not modify t
 
 
 ```
-usage: auto-q.py [-h] -i INPUT -o OUTPUT [-b BEGINWITH] [-t TRIM_THRESHOLD]
-                 [-s STOP_AT] [-j JOINING_METHOD] [-p FASTQ_P]
-                 [-q QC_THRESHOLD] [--continuation_reference C_REF]
-                 [--continuation_otu_id C_OTU_ID] [-c CONFIGFILE]
-                 [--adapter ADAPTER_REFERENCE] [-a MAPPING_FILE]
+usage: auto-q.py [-h] -i Input folder -o Output folder
+                 [-t trim_phred_threshold] [-p fastq-join p]
+                 [--adapter ADAPTER_REFERENCE] [-b starting step] [-s stop at]
+                 [-j joining method] [-m] [-q quality control threshold]
+                 [--continuation_reference newref_seq.fna]
+                 [--continuation_otu_id C_OTU_ID] [-r Reference database]
+                 [-c Configuration file name] [-a Mapping file name]
                  [--parameter_file_name PARAMETER_FILE_NAME]
-                 [-n NUMBER_OF_CORES] [-f] [-m] [-r RDB] [-e DEPTH]
-                 [--ml MINIMUM_LENGTH]
+                 [-n Number of jobs] [-e Sampling depth] [--ml Minimum length]
 
 ```
 
 
 ```
 optional arguments:
-  optional arguments:
   -h, --help            show this help message and exit
-  -i Input folder       The folder where Fastq files are stored [required]
-  -o Output folder      The folder of all results [required]
-  -t Phred threshold    phred quality threshold for trimming [default: 12]
-  -p Percentage of mismatch
-                        Percentage of mismatch fastq-join [default: 16]
+  -i Input folder       the input sequences filepath (fastq files) [REQUIRED]
+  -o Output folder      the output directory [REQUIRED]
+  -t trim_phred_threshold
+                        phred quality threshold for trimming [default: 12]
+  -p fastq-join p       fastq-join's percentage of mismatch [default: 16]
   --adapter ADAPTER_REFERENCE
                         Adapters reference file
-  -b Step               begin with: (otu_picking), (diversity_analysis)
-  -s Analysis step      Terminate the analysis at this step
-  -j Joining method     choose the merging method (fastq-join) or (bbmerge)
+  -b starting step      starting the analysis in the middle: (otu_picking),
+                        (diversity_analysis)
+  -s stop at            terminate the analysis at this step [choices:
+                        (merging), (quality_control), (chimera_removal))
+  -j joining method     choose the merging method (fastq-join) or (bbmerge)
                         [default: fastq-join]
   -m                    Assign maxloose to be true for bbmerge [default:
                         False]
-  -q Number             quality control phred threshold [default: 19]
+  -q quality control threshold
+                        quality control phred threshold [default: 19]
   --continuation_reference newref_seq.fna
-                        Reference sequence for continuation
+                        reference sequence for continuation. If you want to
+                        continue analysis using the reference data set from
+                        previous analysis. you can find it in the last sample
+                        otus folder new_refseqs.fna
   --continuation_otu_id C_OTU_ID
-                        continuation new reference set id
+                        continuation reference new otus ids
   -r Reference database
                         silva, greengenes [default: silva]
   -c Configuration file name
                         Configuration file name [default: qiime.cfg]
-  -a MAPPING_FILE       Mapping file name
+  -a Mapping file name  Mapping file name
   --parameter_file_name PARAMETER_FILE_NAME
                         The name of the parameter file [if not assigned is
                         automatically produced using configuration file
-  -n Number of jobs     Number of cores to be used for the analysis [default:
-                        2]
-  -e DEPTH              set the depth of diversity analyses [default: 10000]
-  --ml MINIMUM_LENGTH   Minimum length of reads kept after merging [default:
+  -n Number of jobs     Specify the number of jobs to start with [default: 2]
+  -e Sampling depth     sampling depth for diversity analyses [default: 10000]
+  --ml Minimum length   Minimum length of reads kept after merging [default:
                         380]
 
 ```
