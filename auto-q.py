@@ -2,6 +2,12 @@
 from __future__ import unicode_literals
 # coding: utf-8
 
+
+
+# Use Gzipped files without extractionpyp
+
+
+import shutil
 import logging
 import datetime
 import os  # operation system packages
@@ -9,14 +15,17 @@ import ConfigParser as configparser  # a package to parse INI file or confige fi
 import argparse  # a package to parse commandline arguments.
 import sys
 from re import sub
+import gzip
+
 
 from subprocess import call  # to run command line scripts
 from subprocess import Popen, PIPE, check_output
 from multiprocessing.dummy import Pool as Pool
 
-__version__ = '0.2.7'
+__version__ = '0.2.7.1'
 __author__ = "Attayeb Mohsen"
-__date__ = "18/12/2017"
+__date__ = "30/8/2018"
+## 30/8/2018 add primer-length parameter
 
 starting_message = """ Microbiome analysis using multiple methods
     Version: %s
@@ -77,7 +86,7 @@ def asfolder(folder):
         return (folder)
 
 
-def execute(command, shell):
+def execute(command, shell=True):
     """
     Execute command using os package and return output to log file
 
@@ -235,6 +244,11 @@ def write_parameter_file(parameter_file):
     f.write(parameter_string)
     f.close()
 
+#def copyfilesanddecompress(inFolder, outFolder):
+#    shutil.copytree(asfolder(inFolder), asfolder(outFolder))
+#    print('copying files')
+#    execute("gunzip %s*.gz"%asfolder(outFolder))
+#    print('decompress files')
 
 def primertrim(infqfile, outfqfile, length):
     """
@@ -244,9 +258,14 @@ def primertrim(infqfile, outfqfile, length):
     :param length:
     :return:
     """
-
-    infq = open(infqfile, "r")
-    outfq = open(outfqfile, "w")
+    if infqfile.endswith(".gz"):
+        infq = gzip.open(infqfile, "r")
+    else:
+        infq = open(infqfile, "r")
+    if outfqfile.endswith(".gz"):
+        outfq = gzip.open(outfqfile, "w")
+    else:
+        outfq = open(outfqfile, "w")
     lines = infq.readlines()
     for a, b, c, d in zip(lines[0::4], lines[1::4], lines[2::4], lines[3::4]):
         outfq.write(a)
@@ -280,7 +299,7 @@ def trimfolder(inFolder, outFolder, trimq, ftrim=True):
     def process(i):
         in1 = inFolder + ins1[i]
         in2 = inFolder + ins2[i]
-        print("%s and %s" % (ins1[i], ins2[i]))
+        print("\n%s and %s" % (ins1[i], ins2[i]))
         out1 = outFolder + ins1[i]
         out2 = outFolder + ins2[i]
         out1_temp1 = outFolder + "temp1_" + ins1[i]
@@ -288,8 +307,8 @@ def trimfolder(inFolder, outFolder, trimq, ftrim=True):
 
         # forctrimleft was added
         if ftrim:
-            primertrim(in1, out1_temp1, 17)
-            primertrim(in2, out2_temp1, 21)
+            primertrim(in1, out1_temp1, PR['primertrim_forward'])
+            primertrim(in2, out2_temp1, PR['primertrim_reverse'])
 
         else:
             out1_temp1 = in1
@@ -307,8 +326,7 @@ def trimfolder(inFolder, outFolder, trimq, ftrim=True):
 
         os.remove(out1_temp1)
         os.remove(out2_temp1)
-
-    p = Pool(number_of_cores)
+    p = Pool(PR['number_of_cores'])
     p.map(process, range(len(ins1)))
 
 
@@ -327,7 +345,7 @@ def mergefolderbb(inFolder, outFolder, maxloose=True):
     ins2 = [x.replace("_R1_", "_R2_") for x in ins1]
     outs = [x.replace("_L001_R1_001", "") for x in ins1]
     os.mkdir(outFolder)
-    print("Merging ...")
+    print("\nMerging ...")
 
     def process(i):
 
@@ -344,8 +362,14 @@ def mergefolderbb(inFolder, outFolder, maxloose=True):
         else:
             execute("bbmerge.sh -in1=%s -in2=%s -out=%s -ignorebadquality" % (in1, in2, out), shell=True)
 
-    p = Pool(number_of_cores)
+        if PR['remove_intermediate']:
+            os.remove(in1)
+            os.remove(in2)
+
+    p = Pool(PR['number_of_cores'])
     p.map(process, range(len(ins1)))
+    if PR['remove_intermediate']:
+        os.removedirs(inFolder)
     print("Merging finished.")
 
 
@@ -373,16 +397,24 @@ def mergefolderfastq(inFolder, outFolder, pp):
         print("Merging: %s and %s " % (ins1[i], ins2[i]))
         out = outFolder + "temp_" + outs[i]
         out_final = outFolder + outs[i]
+        if out_final.endswith(".gz"):
+            out_final = sub(".gz", "", out_final)
         execute("fastq-join -p %d %s %s -o %s" % (pp, in1, in2, out), shell=True)
         os.remove("%sun1" % out)
         os.remove("%sun2" % out)
         os.rename("%sjoin" % out, out)
         remove_short_reads(out, out_final, PR['minimum_length'])
         os.remove(out)
+        if PR['remove_intermediate']:
+            os.remove(in1)
+            os.remove(in2)
 
-    p = Pool(number_of_cores)
+
+
+    p = Pool(PR['number_of_cores'])
     p.map(process, range(len(ins1)))
-
+    if PR['remove_intermediate']:
+        os.removedirs(inFolder)
 
 def qualitycontrol(inFolder, outFolder, q):
     """
@@ -401,7 +433,7 @@ def qualitycontrol(inFolder, outFolder, q):
 
     def process(i):
         temp = outFolder + "temp" + i + "/"
-        print("Quality control: %s" % i)
+        print("\nQuality control: %s" % i)
         sampleId = i.replace(".fastq", "")
         inFile = inFolder + i
         outFile = outFolder + i.replace(".fastq", ".fasta")
@@ -411,11 +443,15 @@ def qualitycontrol(inFolder, outFolder, q):
         tempFile = temp + "seqs.fna"
         call("mv %s %s" % (tempFile, outFile), shell=True)
         call("rm -r %s" % temp, shell=True)
+        if PR['remove_intermediate']:
+            os.remove(inFile)
 
-    p = Pool(5)
+
+    p = Pool(PR['number_of_cores'])
     p.map(process, files)
     print("Quality control finished.")
-
+    if PR['remove_intermediate']:
+        os.removedirs(inFolder)
 
 def removechimera(inFolder, outFolder, rdb="silva"):
     """
@@ -449,10 +485,13 @@ def removechimera(inFolder, outFolder, rdb="silva"):
         execute("filter_fasta.py -f %s -o %s -s %s/non_chimeras.txt" % (inFolder + i, outFolder + i, temp + i),
                 shell=True)
         call("rm -r %s" % temp, shell=True)
+        if PR['remove_intermediate']:
+            os.remove(inFolder+i)
 
-    p = Pool(number_of_cores)
+    p = Pool(PR['number_of_cores'])
     p.map(process, files)
-
+    if PR['remove_intermediate']:
+        os.removedirs(inFolder)
 
 def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
     """
@@ -528,6 +567,9 @@ def pickotus(inFolder, outFolder, rdb="silva", fungus=False):
                        outFolder + "otu_table_mc2_w_tax_no_pynast_failures_close_reference.biom",
                        PR['gg_reference_seqs']), shell=True)
 
+    if PR['remove_intermediate']:
+        os.removedirs(inFolder)
+
 
 def writedf(outFile, ids, sampleIds):
     f = open(outFile, "w+")
@@ -583,7 +625,6 @@ def full_analysis(inFolder, outFolder, depth, rdb, trimq, joining_method,
     """
     
     """
-
     trimmed = asfolder(outFolder + PR['Ftrimmed'])
     merged = asfolder(outFolder + PR['Fmerged'])
     qc = asfolder(outFolder + PR['Fqc'])
@@ -591,13 +632,13 @@ def full_analysis(inFolder, outFolder, depth, rdb, trimq, joining_method,
     otus = asfolder(outFolder + PR['Fotus'])
     div = asfolder(outFolder + PR['Fdiv'])
 
-    trimfolder(inFolder, trimmed, trimq)
+    trimfolder(fastq, trimmed, trimq)
     if joining_method == "fastq-join":
         mergefolderfastq(trimmed, merged, fastq_p)
     elif joining_method == "bbmerge":
         mergefolderbb(trimmed, merged, maxloose=maxloose)
     else:
-        raise ("error method")
+        raise ("Wrong method")
     qualitycontrol(merged, qc, qcq)
     removechimera(qc, chi, rdb)
     pickotus(chi, otus, rdb)
@@ -706,6 +747,7 @@ if __name__ == "__main__":
                         metavar="Output folder",
                         help="the output directory [REQUIRED]",
                         required=True)
+
 
     parser.add_argument("-t",
                         dest="trim_threshold",
@@ -821,6 +863,16 @@ if __name__ == "__main__":
                         help="sampling depth for diversity analyses [default: 10000]",
                         default=10000)
 
+    parser.add_argument("--remove_intermediate_files",
+                        help="To remove intermediate files, to reduce the disk space",
+                        dest="remove_intermediate",
+                        action="store_true")
+
+#    parser.add_argument("--decompress",
+#                        help="Copy input files to outputfolder/fastq and decompress them",
+#                        dest="decompress",
+#                        action="store_true")
+
     parser.add_argument("--ml",
                         dest="minimum_length",
                         metavar='Minimum length',
@@ -828,13 +880,30 @@ if __name__ == "__main__":
                         help="Minimum length of reads kept after merging [default: 380]",
                         default=380)
 
+    parser.add_argument("--primer-trim-f",
+                        dest="primertrim_forward",
+                        metavar='Primer Trim',
+                        type=int,
+                        help="length of the forward primer [17]",
+                        default=17)
+
+    parser.add_argument("--primer-trim-r",
+                        dest="primertrim_reverse",
+                        metavar='Primer Trim',
+                        type=int,
+                        help="length of the reverse primer [21]",
+                        default=21)
+
     #x = parser.format_usage()
     #parser.usage = starting_message #+ x
     arg = parser.parse_args()
 
     PR.update({
+
         'in_folder': asfolder(arg.input),
         'out_folder': asfolder(arg.output),
+#        'decompress': arg.aaa
+        # ress,
         'rdb': arg.rdb,
         'qcq': arg.qc_threshold,
         'maxloose': arg.maxloose,
@@ -844,17 +913,25 @@ if __name__ == "__main__":
         'depth': arg.depth,
         'ConfigFile': arg.ConfigFile,
         'parameter_file_name': arg.parameter_file_name,
+        'remove_intermediate': arg.remove_intermediate,
         'beginwith': arg.beginwith,
         'mapping_file': arg.mapping_file,
         'adapter_ref': arg.adapter_reference,
         'minimum_length': arg.minimum_length,
         'c_ref': arg.c_ref,
-        'c_otu_id': arg.c_otu_id})
-
+        'c_otu_id': arg.c_otu_id,
+        'primertrim_forward': arg.primertrim_forward,
+        'primertrim_reverse': arg.primertrim_reverse})
 
     ## parameter_file
     get_configuration()
     check_before_start()
+
+
+
+
+
+
     if PR['rdb'] == 'unite':
         PR['fungus'] = True
     else:
@@ -870,6 +947,19 @@ if __name__ == "__main__":
         sys.exit()
     else:
         os.mkdir(PR['out_folder'])
+    if not os.path.isdir(PR['others']):
+        os.mkdir(PR['others'])
+
+    logging.basicConfig(filename=PR['others'] + "log.txt",
+                        format='%(levelname)s \n %(message)s',
+                        level=logging.DEBUG)
+    loginfo('started')
+    [loginfo(str(P) + ": " + str(PR[P])) for P in PR]
+
+#    if PR['decompress']:
+#        copyfilesanddecompress(PR['in_folder'], asfolder(PR['out_folder']+"fastq"))
+#        PR['in_folder'] = asfolder(PR['out_folder'])+'fastq/'
+
 
     if arg.parameter_file_name == None:
         PR['parameter_file_name'] = PR['others'] + "para%s.txt" % PR['id']
@@ -882,16 +972,9 @@ if __name__ == "__main__":
 
     if (arg.beginwith == "diversity_analysis") and (arg.mapping_file == None):
         pass
-    if not os.path.isdir(PR['others']):
-        os.mkdir(PR['others'])
-
-    logging.basicConfig(filename=PR['others'] + "log.txt",
-                        format='%(levelname)s \n %(message)s',
-                        level=logging.DEBUG)
 
     number_of_cores = PR['number_of_cores']
-    loginfo('started')
-    [loginfo(str(P) + ": " + str(PR[P])) for P in PR]
+
 
     if arg.beginwith == "otu_picking":
         start_otu_pickng(inFolder=PR['in_folder'],
@@ -902,6 +985,7 @@ if __name__ == "__main__":
     elif arg.beginwith == "diversity_analysis":
         start_diversity_analysis(inFolder=PR['in_folder'],
                                  outFolder=PR['out_folder'],
+                                 mapping_file=PR['mapping_file'],
                                  depth=PR['depth'])
 
 
