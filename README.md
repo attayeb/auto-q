@@ -30,14 +30,8 @@ $ git clone https://github.com/Attayeb/auto-q/ && rm -rf auto-q/.git
 ```
 Edit .bashrc in your home directory and add the following line at the end:
 ```buildoutcfg
-$ export PATH="/home/qiime/bin/auto-q/:/home/qiime/bin/bbtools/:/home/qiime/bin/usearch/:$PATH"
+$ echo 'export PATH="/home/qiime/bin/auto-q/:/home/qiime/bin/bbtools/:/home/qiime/bin/usearch/:$PATH"' >> ~/.bashrc
 ```
-You need superuser permission to modify .bashrc file.
-```buildoutcfg
-$ sudo gedit ~/.bashrc
-``` 
-The password for qiime user is qiime, 
-This file is important for your machine, so be careful not to affect other lines.
 
 5. If you want to use SILVA database you can download it from here <https://www.arb-silva.de/no_cache/download/archive/qiime/> use the latest one Silva_128_release.tgz, after downloading this file decompress it.
 6. Modify qiime.cfg file to indicate the folders of your database. The default preinstalled greengenes folder is: /home/qiime/lib/python2.7/site-packages/qiime_default_reference/gg_13_8_otus/
