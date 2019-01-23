@@ -64,7 +64,10 @@ usage: auto-q.py [-h] -i Input folder -o Output folder
                  [--continuation_otu_id C_OTU_ID] [-r Reference database]
                  [-c Configuration file name] [-a Mapping file name]
                  [--parameter_file_name PARAMETER_FILE_NAME]
-                 [-n Number of jobs] [-e Sampling depth] [--ml Minimum length]
+                 [-n Number of jobs] [-e Sampling depth]
+                 [--remove_intermediate_files] [--ml Minimum length]
+                 [--primer-trim-f Primer Trim] [--primer-trim-r Primer Trim]
+
 
 ```
 
@@ -80,7 +83,7 @@ optional arguments:
   --adapter ADAPTER_REFERENCE
                         Adapters reference file
   -b starting step      starting the analysis in the middle: (otu_picking),
-                        (diversity_analysis)
+                        (diversity_analysis), (chimera_removal)
   -s stop at            terminate the analysis at this step [choices:
                         (merging), (quality_control), (chimera_removal))
   -j joining method     choose the merging method (fastq-join) or (bbmerge)
@@ -106,8 +109,15 @@ optional arguments:
                         automatically produced using configuration file
   -n Number of jobs     Specify the number of jobs to start with [default: 2]
   -e Sampling depth     sampling depth for diversity analyses [default: 10000]
+  --remove_intermediate_files
+                        To remove intermediate files, to reduce the disk space
   --ml Minimum length   Minimum length of reads kept after merging [default:
                         380]
+  --primer-trim-f Primer Trim
+                        length of the forward primer [17]
+  --primer-trim-r Primer Trim
+                        length of the reverse primer [21]
+
 
 ```
 

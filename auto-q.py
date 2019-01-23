@@ -22,10 +22,12 @@ from subprocess import call  # to run command line scripts
 from subprocess import Popen, PIPE, check_output
 from multiprocessing.dummy import Pool as Pool
 
-__version__ = '0.2.7.1'
+__version__ = '0.2.7.2'
 __author__ = "Attayeb Mohsen"
-__date__ = "30/8/2018"
+__date__ = "23/1/2019"
 ## 30/8/2018 add primer-length parameter
+## 23/1/2019 correct a merging bug
+## add start_at_chimera_removal option
 
 starting_message = """ Microbiome analysis using multiple methods
     Version: %s
