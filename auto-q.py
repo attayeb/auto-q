@@ -238,7 +238,10 @@ def write_parameter_file(parameter_file):
            'core_alignment': PR['gg_core_alignment'],
            'jobs_to_start': PR['number_of_cores'],
            'similarity': PR['similarity']}
-    os.mkdir(PR['others'])
+    if os.path.exists(PR['others']):
+         pass
+    else:
+         os.mkdir(PR['others'])
 
     f = open(parameter_file, "w")
     f.write(parameter_string)
@@ -623,7 +626,7 @@ def full_analysis(inFolder, outFolder, depth, rdb, trimq, joining_method,
                   qcq, maxloose, fastq_p):
     global PR
     """
-    
+
     """
     trimmed = asfolder(outFolder + PR['Ftrimmed'])
     merged = asfolder(outFolder + PR['Fmerged'])
@@ -632,7 +635,7 @@ def full_analysis(inFolder, outFolder, depth, rdb, trimq, joining_method,
     otus = asfolder(outFolder + PR['Fotus'])
     div = asfolder(outFolder + PR['Fdiv'])
 
-    trimfolder(fastq, trimmed, trimq)
+    trimfolder(inFolder, trimmed, trimq)
     if joining_method == "fastq-join":
         mergefolderfastq(trimmed, merged, fastq_p)
     elif joining_method == "bbmerge":
@@ -1031,3 +1034,4 @@ if __name__ == "__main__":
                       trimq=PR['trimq'])
 
     loginfo("Finished")
+
