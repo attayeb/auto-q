@@ -376,7 +376,7 @@ def mergefolderbb(inFolder, outFolder, maxloose=True):
     print("Merging finished.")
 
 
-def mergefolderfastq(inFolder, outFolder, pp):
+def mergefolder(inFolder, outFolder, pp):
     """
 
     """
@@ -708,6 +708,21 @@ def stop_at_chimera_removal(inFolder, outFolder, rdb, trimq, joining_method,
     removechimera(qc, chi, rdb)
 
 
+def start_at_chimera_removal(inFolder, outFolder, rdb, depth):
+    global PR
+
+    qc = asfolder(inFolder)
+    chi = asfolder(outFolder + PR['Fchi'])
+    otus = asfolder(outFolder + PR['Fotus'])
+    div = asfolder(outFolder + PR['Fdiv'])
+
+    removechimera(qc, chi, rdb)
+    pickotus(chi, otus, rdb)
+    # here
+    if create_mapping_file:
+        create_map(qc, PR['mapping_file'])
+    corediv(otus, div, PR['mapping_file'], depth)
+
 def start_otu_pickng(inFolder, outFolder, depth, rdb):
     """
 
@@ -776,8 +791,8 @@ if __name__ == "__main__":
                         dest="beginwith",
                         type=str,
                         metavar="starting step",
-                        choices=['otu_picking', 'diversity_analysis'],
-                        help="starting the analysis in the middle: (otu_picking), (diversity_analysis)")
+                        choices=['otu_picking', 'diversity_analysis', 'chimera_removal'],
+                        help="starting the analysis in the middle: (otu_picking), (diversity_analysis), (chimera_removal)")
 
 
     parser.add_argument("-s",
@@ -991,7 +1006,11 @@ if __name__ == "__main__":
                                  mapping_file=PR['mapping_file'],
                                  depth=PR['depth'])
 
-
+    elif arg.beginwith == "chimera_removal":
+        start_at_chimera_removal(inFolder=PR['in_folder'],
+                                 outFolder=PR['out_folder'],
+                                 rdb= PR['rdb'],
+                                 depth=PR['depth'])
 
     elif arg.stop_at == "chimera_removal":
         stop_at_chimera_removal(inFolder=PR['in_folder'],

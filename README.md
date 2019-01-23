@@ -111,9 +111,28 @@ optional arguments:
 
 ```
 
-## Example:
+## Examples:
+
+
+##### Using silva database:
 ```
 $ auto-q.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -t 12 -p 10 -r silva -n 10 -e 5000 -c /bin/auto-q/qiime.cfg 
+```
+
+##### Stop at merging step:
+```buildoutcfg
+$ auto-q.py -i /data/experiment1/fastqs/ -o /data/experiment1/results/ -t 10 -p 16 -s merging -n 10 -c /bin/auto-q/qiime.cfg
+```
+
+##### Begin analysis with otu picking using fasta files after chimera removal:
+```buildoutcfg
+$ auto-q.py -i /data/experiment1/results/chi/ -o /data/experiment1/results/ -b otu_picking -n 10 -c /bin/auto-q/qiime.cfg
+```
+
+##### If not going run the script in parallel use (-n 1):
+
+```buildoutcfg
+$ auto-q.py -i /data/experiment1/results/chi/ -o /data/experiment1/results/ -b otu_picking -n 1 -c /bin/auto-q/qiime.cfg
 ```
 
 ## Results:
@@ -129,5 +148,9 @@ Output folder will has 7 subfolders:
 | otus\       | picked otus *standard Qiime output*       |
 | div\        | diversity analyses results                |
 
+## Stop at:
+
+
+
 ## How to cite:
-The paper of the script is under preparation now
+The paper of the script is under preparation now.
