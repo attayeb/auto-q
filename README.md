@@ -136,7 +136,7 @@ $ auto-q.py -i /data/experiment1/results/chi/ -o /data/experiment1/results/ -b o
 ```
 
 ## Results:
-Output folder will has 7 subfolders:
+Full analysis output folder will has 7 subfolders:
 
 | Folder name | content                                   |
 |-------------|-------------------------------------------|
