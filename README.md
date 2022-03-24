@@ -163,4 +163,4 @@ Full analysis output folder will has 7 subfolders:
 
 
 ## How to cite:
-The paper of the script is under preparation now.
+Mohsen, A., Park, J., Chen, YA. et al. Impact of quality trimming on the efficiency of reads joining and diversity analysis of Illumina paired-end reads in the context of QIIME1 and QIIME2 microbiome analysis frameworks. BMC Bioinformatics 20, 581 (2019). https://doi.org/10.1186/s12859-019-3187-5
