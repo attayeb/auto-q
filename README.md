@@ -163,4 +163,19 @@ Full analysis output folder will has 7 subfolders:
 
 
 ## How to cite:
-Mohsen, A., Park, J., Chen, YA. et al. Impact of quality trimming on the efficiency of reads joining and diversity analysis of Illumina paired-end reads in the context of QIIME1 and QIIME2 microbiome analysis frameworks. BMC Bioinformatics 20, 581 (2019). https://doi.org/10.1186/s12859-019-3187-5
+Mohsen, A., Park, J., Chen, YA., Kawashima, H., Mizuguchi, K., Impact of quality trimming on the efficiency of reads joining and diversity analysis of Illumina paired-end reads in the context of QIIME1 and QIIME2 microbiome analysis frameworks. BMC Bioinformatics 20, 581 (2019). https://doi.org/10.1186/s12859-019-3187-5
+
+ @article{Mohsen_Park_Chen_Kawashima_Mizuguchi_2019, 
+          title={Impact of quality trimming on the efficiency of reads joining and diversity analysis of Illumina paired-end reads in the context of QIIME1 and QIIME2 microbiome analysis frameworks}, 
+          volume={20}, 
+          ISSN={1471-2105}, 
+          DOI={10.1186/s12859-019-3187-5}, 
+          number={1}, 
+          journal={BMC Bioinformatics}, 
+          author={Mohsen, Attayeb and Park, Jonguk and Chen, Yi-An and Kawashima, Hitoshi and Mizuguchi, Kenji}, 
+          year={2019}, 
+          month={Nov}, 
+          pages={581} 
+          }
+
+
